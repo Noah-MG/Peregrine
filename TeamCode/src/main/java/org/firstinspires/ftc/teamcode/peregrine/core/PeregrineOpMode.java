@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.peregrine.editables.Hardware;
  * <h3>PeregrineOpMode is the basic class that all opModes extend from, replacing LinearOpMode in
  * the normal FTC SDK.</h3>
  *
- * <p>PeregrineOpMode should never directly be mentioned by any of your code. It is further extended
+ * <p>PeregrineOpMode should never directly be extended by any of your opModes. It is further extended
  * by PeregrineAutonomous and PeregrineTeleop, which should be used for their respective opMode
  * types instead of PeregrineOpMode. It provides a universal interface that can be used by tasks
  * to access to robot's hardware and any other global variables that you may choose to add to the
@@ -30,6 +30,10 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     //This is the regular opMode function, being mapped to those below
     public void runOpMode() {
 
+        hardware = new Hardware();
+        localizer = new Localizer();
+        globalVariables = new GlobalVariables();
+
         initStart();
 
         while(opModeInInit()) {
@@ -48,19 +52,19 @@ public abstract class PeregrineOpMode extends LinearOpMode {
 
     }
 
-    /**This gets run once at the start of init.*/
+    /**Is run once at the start of init.*/
     public abstract void initStart();
 
-    /**This gets run repeatedly throughout init until you press run.*/
+    /**Is run repeatedly throughout init until you press run.*/
     public abstract void initLoop();
 
-    /**This gets run once immediately after you press start.*/
+    /**Is run once immediately after you press start.*/
     public abstract void mainStart();
 
-    /**This gets run repeatedly after the start button is pressed, it is where the main body of code is run.*/
+    /**Is run repeatedly after the start button is pressed, it is where the main body of code is run.*/
     public abstract void mainLoop();
 
-    /**This gets run once at the end of the opMode.*/
+    /**Is run once at the end of the opMode.*/
     public abstract void end();
 
 }

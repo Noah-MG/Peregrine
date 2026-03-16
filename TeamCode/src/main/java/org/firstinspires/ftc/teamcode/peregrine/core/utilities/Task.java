@@ -1,4 +1,6 @@
-package org.firstinspires.ftc.teamcode.peregrine.core;
+package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
+
+import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
 
 /**
  *  <h3>The class that represents any action the robot might take, no matter how complicated</h3>
@@ -8,6 +10,12 @@ package org.firstinspires.ftc.teamcode.peregrine.core;
  */
 
 public abstract class Task {
+
+    /**
+     * Stores the opMode itself, from which most references to things running independently of this
+     * task derive.
+     */
+    protected PeregrineOpMode opMode;
 
     /**
      * Executes the task. Should be run in a loop until it returns false.

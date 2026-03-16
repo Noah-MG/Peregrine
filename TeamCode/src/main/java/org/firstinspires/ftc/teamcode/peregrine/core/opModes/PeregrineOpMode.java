@@ -1,7 +1,10 @@
-package org.firstinspires.ftc.teamcode.peregrine.core;
+package org.firstinspires.ftc.teamcode.peregrine.core.opModes;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Localizer;
 import org.firstinspires.ftc.teamcode.peregrine.editables.GlobalVariables;
 import org.firstinspires.ftc.teamcode.peregrine.editables.Hardware;
 
@@ -27,12 +30,18 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     /**This is the global variables object that contains every variable you use for your specific robot. It is in the editables package to allow you to add more detail.*/
     public GlobalVariables globalVariables;
 
+    /**
+     * This is the telemetry object, it can be used to push telemetry the ftc dashboard on 192.168.43.1:8080/dash on your robot's network
+     */
+    public Telemetry telem;
+
     //This is the regular opMode function, being mapped to those below
     public void runOpMode() {
 
         hardware = new Hardware();
-        localizer = new Localizer();
+        localizer = new Localizer(this);
         globalVariables = new GlobalVariables();
+        telem = FtcDashboard.getInstance().getTelemetry();
 
         initStart();
 
@@ -46,6 +55,8 @@ public abstract class PeregrineOpMode extends LinearOpMode {
 
         while(opModeIsActive()) {
             mainLoop();
+            telem.update();
+            telemetry.update();
         }
 
         end();

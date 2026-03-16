@@ -1,4 +1,6 @@
-package org.firstinspires.ftc.teamcode.peregrine.core;
+package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
+
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**
  * <h3>A compound task that plays each input in order</h3>

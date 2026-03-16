@@ -1,4 +1,6 @@
-package org.firstinspires.ftc.teamcode.peregrine.core;
+package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
+
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**
  * <h3>A compound task that plays each input simultaneously</h3>
@@ -7,7 +9,7 @@ package org.firstinspires.ftc.teamcode.peregrine.core;
  * have completed.</p>
  */
 
-public class ParallelTask extends Task{
+public class ParallelTask extends Task {
 
     //One of the tasks to be run
     Task taskOne;

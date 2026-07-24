@@ -19,7 +19,7 @@ public abstract class PeregrineTeleop extends PeregrineOpMode {
      */
     public abstract Task defineTasks();
 
-    public void mainLoop() {
-        teleop.run();
+    public boolean mainLoop() {
+        return teleop.run();
     }
 }

@@ -53,8 +53,7 @@ public abstract class PeregrineOpMode extends LinearOpMode {
 
         mainStart();
 
-        while(opModeIsActive()) {
-            mainLoop();
+        while(opModeIsActive() && !mainLoop()) {
             telem.update();
             telemetry.update();
         }
@@ -73,7 +72,7 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     public abstract void mainStart();
 
     /**Is run repeatedly after the start button is pressed, it is where the main body of code is run.*/
-    public abstract void mainLoop();
+    public abstract boolean mainLoop();
 
     /**Is run once at the end of the opMode.*/
     public abstract void end();

@@ -45,7 +45,7 @@ public class ParallelRaceTask extends Task {
     public boolean run() {
         taskOneDone = taskOne.run();
         taskTwoDone = taskTwo.run();
-        return taskOneDone && taskTwoDone;
+        return taskOneDone || taskTwoDone;
     }
 
     public boolean end() {

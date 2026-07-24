@@ -19,8 +19,8 @@ public abstract class PeregrineAutonomous extends PeregrineOpMode {
      */
     public abstract Task defineTasks();
 
-    public void mainLoop() {
-        auto.run();
+    public boolean mainLoop() {
+        return auto.run();
     }
 
 }

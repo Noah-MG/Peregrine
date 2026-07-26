@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Localizer;
 import org.firstinspires.ftc.teamcode.peregrine.editables.GlobalVariables;
 import org.firstinspires.ftc.teamcode.peregrine.editables.Hardware;
@@ -35,13 +36,19 @@ public abstract class PeregrineOpMode extends LinearOpMode {
      */
     public Telemetry telem;
 
+    /**
+     * This function should return the pose of the robot when init is pressed
+     * @return The pose of the robot when init is pressed
+     */
+    public abstract Pose2D startingPose();
+
     //This is the regular opMode function, being mapped to those below
     public void runOpMode() {
 
-        hardware = new Hardware();
-        localizer = new Localizer(this);
-        globalVariables = new GlobalVariables();
         telem = FtcDashboard.getInstance().getTelemetry();
+        hardware = new Hardware(this);
+        localizer = new Localizer(this, startingPose());
+        globalVariables = new GlobalVariables();
 
         initStart();
 

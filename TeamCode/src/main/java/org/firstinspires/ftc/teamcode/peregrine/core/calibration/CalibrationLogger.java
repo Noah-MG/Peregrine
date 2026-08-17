@@ -35,6 +35,8 @@ public class CalibrationLogger extends Task {
 
         sdCard = findSdCard();
         if(!sdInserted || sdCard == null) {
+            opMode.telem.addLine("1");
+            opMode.telem.update();
             opMode.requestOpModeStop();
             return;
         }
@@ -43,12 +45,15 @@ public class CalibrationLogger extends Task {
         if(!logDir.exists()) {
             if(!logDir.mkdirs()) {
                 sdInserted = false;
+                opMode.telem.addData("Mounted", Environment.getExternalStorageState(sdCard).equals(Environment.MEDIA_MOUNTED));
+                opMode.telem.addLine("2");
+                opMode.telem.update();
                 opMode.requestOpModeStop();
                 return;
             }
         }
 
-        logFile = new File(logDir, "calibration_log_" + new SimpleDateFormat("yyyMMdd_HHmmss", Locale.US).format(new Date()) + ".csv");
+        logFile = new File(logDir, "calibration_log_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date()) + ".csv");
 
         try {
             writer = new FileWriter(logFile, true);
@@ -81,7 +86,9 @@ public class CalibrationLogger extends Task {
         double h_vel = opMode.localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
 
         try{
-            writer.write(time.milliseconds() + "," + FR + "," + FL + "," + BR + "," + BL + "," + x + "," + y + "," + h + "," + x_vel + "," + y_vel + "," + h_vel);
+            opMode.telem.addData("0 distance", Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+            opMode.telem.addData("data", time.milliseconds() + "," + FR + "," + FL + "," + BR + "," + BL + "," + x + "," + y + "," + h + "," + x_vel + "," + y_vel + "," + h_vel);
+            writer.write(time.milliseconds() + "," + FR + "," + FL + "," + BR + "," + BL + "," + x + "," + y + "," + h + "," + x_vel + "," + y_vel + "," + h_vel + "\n");
             writer.flush();
         } catch (Exception e) {
             opMode.telem.addData("Exception", e);

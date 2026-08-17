@@ -53,7 +53,7 @@ public class ParallelRaceTask extends Task {
     }
 
     public Task reset() {
-        return new ParallelTask(taskOne.reset(), taskTwo.reset());
+        return new ParallelRaceTask(taskOne.reset(), taskTwo.reset());
     }
 
 }

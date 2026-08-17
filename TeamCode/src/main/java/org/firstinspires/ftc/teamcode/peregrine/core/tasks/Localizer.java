@@ -47,6 +47,7 @@ public class Localizer extends Task {
 
     @Override
     public boolean run() {
+        opMode.hardware.odo.update();
         return false;
     }
 

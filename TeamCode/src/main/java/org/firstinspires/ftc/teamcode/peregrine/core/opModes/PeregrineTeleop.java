@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
-@TeleOp
 public abstract class PeregrineTeleop extends PeregrineOpMode {
 
     Task teleop;

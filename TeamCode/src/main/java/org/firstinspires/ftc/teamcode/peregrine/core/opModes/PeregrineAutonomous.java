@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
-@Autonomous
 public abstract class PeregrineAutonomous extends PeregrineOpMode {
 
     Task auto;

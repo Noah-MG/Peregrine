@@ -40,7 +40,7 @@ public class Calibration extends PeregrineTeleop {
     }
 
     @Override
-    public void end() {
+    public void finish() {
 
     }
 }

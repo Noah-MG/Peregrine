@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -32,6 +33,7 @@ public class TableReader {
     RandomAccessFile[][] table;
 
     public String[] targetNames;
+    public HashMap<String, Integer> targets;
     public double[][] targetStates;
     String dtype;
 
@@ -79,6 +81,7 @@ public class TableReader {
         }
 
         targetNames = new String[manifest.get("targets").size()];
+        targets = new HashMap<String, Integer>();
         targetStates = new double[manifest.get("targets").size()][6];
         dtype = manifest.get("encoding").get("dtype").asText();
 
@@ -122,6 +125,7 @@ public class TableReader {
             int idx = manifest.get("targets").get(p).get("index").asInt();
             table[idx] = new RandomAccessFile[manifest.get("targets").get(p).get("n_chunks").asInt()];
             targetNames[idx] = manifest.get("targets").get(p).get("name").asText();
+            targets.put(targetNames[idx], idx);
             for (int i = 0; i < 6; i++) {
                 targetStates[idx][i] = manifest.get("targets").get(p).get("state").get(i).asDouble();
             }
@@ -140,12 +144,12 @@ public class TableReader {
         bytes = new byte[manifest.get("encoding").get("elem_bytes").asInt()];
     }
 
-    public double[] getGradient(int target) {
+     double[] getGradient(int target) {
         Pose2D pose = opMode.localizer.getPose();
         return getGradient(target, new double[]{pose.getX(DistanceUnit.CM), pose.getY(DistanceUnit.CM), pose.getHeading(AngleUnit.RADIANS), opMode.localizer.getVelX(DistanceUnit.CM), opMode.localizer.getVelY(DistanceUnit.CM), opMode.localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS)});
     }
 
-    public double[] getGradient(int target, double[] state) {
+     double[] getGradient(int target, double[] state) {
 
         if(state.length != 6) {
             opMode.telem.addLine("The state vector must be 6 values in length!");

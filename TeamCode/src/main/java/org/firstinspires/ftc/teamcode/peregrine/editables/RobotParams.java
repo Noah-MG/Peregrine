@@ -14,8 +14,8 @@ public final class RobotParams {
 
     public static DistanceUnit distanceUnit = DistanceUnit.CM;
 
-    public static double odoXOffset = -0.04161;
-    public static double odoYOffset = 0.18346;
+    public static double odoXOffset = 4.958;
+    public static double odoYOffset = -18.858;
     public static GoBildaPinpointDriver.GoBildaOdometryPods podType = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
     public static GoBildaPinpointDriver.EncoderDirection xEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
     public static GoBildaPinpointDriver.EncoderDirection yEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;

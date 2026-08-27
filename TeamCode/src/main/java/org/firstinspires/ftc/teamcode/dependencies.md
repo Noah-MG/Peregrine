@@ -5,4 +5,5 @@ says `implementation` over and over again.
 ```gradle
 implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
 implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
+implementation 'org.ejml:ejml-all:0.38'
 ```

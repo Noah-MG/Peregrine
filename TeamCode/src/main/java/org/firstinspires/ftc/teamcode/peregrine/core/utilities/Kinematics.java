@@ -5,15 +5,15 @@ import org.firstinspires.ftc.teamcode.peregrine.editables.RobotParams;
 
 public final class Kinematics {
 
-    public static void powerMotors(double x, double y, double h, PeregrineOpMode opMode) {
+    public static void powerMotors(double y, double x, double h, PeregrineOpMode opMode) {
         switch(RobotParams.chassis) {
             case MECANUM:
 
                 // Combine the joystick requests for each axis-motion to determine each wheel's power.
-                double fr = y + x + h;
-                double fl = y - x - h;
-                double br = y - x + h;
-                double bl = y + x - h;
+                double fr = y + x - h;
+                double fl = y - x + h;
+                double br = y - x - h;
+                double bl = y + x + h;
 
                 // Normalize the values so no wheel power exceeds 100%
                 double max = Math.max(Math.max(Math.max(Math.abs(fr), Math.abs(fl)), Math.abs(br)), Math.abs(bl));

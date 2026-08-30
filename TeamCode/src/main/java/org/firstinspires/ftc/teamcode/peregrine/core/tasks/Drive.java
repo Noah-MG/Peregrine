@@ -1,44 +1,35 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
-import org.firstinspires.ftc.teamcode.peregrine.core.utilities.TableReader;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Kinematics;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 public class Drive extends Task {
 
     PeregrineOpMode opMode;
-    TableReader tableReader;
-    ElapsedTime cycle;
+    String targetName;
+    int target;
 
-    double[] gradient;
-    String output;
-
-    public Drive(PeregrineOpMode opMode) {
+    public Drive(PeregrineOpMode opMode, String target) {
         this.opMode = opMode;
-        tableReader = new TableReader(opMode);
-        cycle = new ElapsedTime();
+        targetName = target;
+        this.target = opMode.optimalityEngine.targets.get(targetName);
     }
 
     @Override
     public boolean run() {
-//        gradient = tableReader.getGradient(1, new double[]{50, 45, 2.738, 0.63, 0.01, 0});
-        output = gradient[0] + ", " + gradient[1] + ", " + gradient[2] + ", " + gradient[3] + ", " + gradient[4] + ", " + gradient[5];
-        opMode.telem.addData("gradient", output);
-        opMode.telem.addData("cycle time", cycle.milliseconds());
-        cycle.reset();
-        return true;
+        double[] control = opMode.optimalityEngine.solve(target);
+        Kinematics.powerMotors(control[0], control[1], control[2], opMode);
+        return false; //TODO: make this actually know when it is done and possibly let it hone in on the target at the end with a PID???
     }
 
     @Override
     public boolean end() {
-        tableReader.closeReaders();
         return true;
     }
 
     @Override
     public Task reset() {
-        return new Drive(opMode);
+        return new Drive(opMode, targetName);
     }
 }

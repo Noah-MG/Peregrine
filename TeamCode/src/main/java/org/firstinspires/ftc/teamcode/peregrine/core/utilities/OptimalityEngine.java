@@ -5,10 +5,14 @@ import static androidx.core.math.MathUtils.clamp;
 import android.content.Context;
 import android.os.Environment;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -22,13 +26,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-public class TableReader {
+@Config
+public class OptimalityEngine {
 
     PeregrineOpMode opMode;
 
     File sdCard;
     ObjectMapper mapper;
     JsonNode manifest;
+    JsonNode model;
 
     RandomAccessFile[][] table;
 
@@ -39,7 +45,15 @@ public class TableReader {
 
     byte[] bytes;
 
-    public TableReader(PeregrineOpMode opMode) {
+    double[][] AuBasic;
+    SimpleMatrix Au;
+    double knee;
+
+    public static int iterations = 3;
+
+    Pose2D pose;
+
+    public OptimalityEngine(PeregrineOpMode opMode) {
         this.opMode = opMode;
 
         mapper = new ObjectMapper();
@@ -54,7 +68,8 @@ public class TableReader {
         }
 
         File manifestFile = new File(sdCard, "MANIFEST.JSON");
-        if(!manifestFile.exists()) {
+        File modelFile = new File(sdCard, "MODEL.JSON");
+        if(!(manifestFile.exists() && modelFile.exists())) {
             opMode.telem.addData("Tables not found on ", sdCard);
             if(!Environment.getExternalStorageState(sdCard).equals(Environment.MEDIA_MOUNTED)) {
                 opMode.telem.addLine("SD Card not mounted, did you format it to FAT32?");
@@ -66,6 +81,7 @@ public class TableReader {
 
         try {
             manifest = mapper.readTree(manifestFile);
+            model = mapper.readTree(modelFile);
         } catch (Throwable t) {
             opMode.telem.addData("Error", t);
             opMode.telem.update();
@@ -81,7 +97,7 @@ public class TableReader {
         }
 
         targetNames = new String[manifest.get("targets").size()];
-        targets = new HashMap<String, Integer>();
+        targets = new HashMap<>();
         targetStates = new double[manifest.get("targets").size()][6];
         dtype = manifest.get("encoding").get("dtype").asText();
 
@@ -142,10 +158,115 @@ public class TableReader {
         }
 
         bytes = new byte[manifest.get("encoding").get("elem_bytes").asInt()];
+
+        AuBasic = new double[3][3];
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                AuBasic[i][j] = model.get("A_u").get(i).get(j).asDouble();
+            }
+        }
+        Au = new SimpleMatrix(AuBasic);
+
+        knee = model.get("control").get("saturation").get("knee").asDouble();
+    }
+
+    public double[] solve(int target) {
+        pose = opMode.localizer.getPose();
+        double[] grad = getGradient(target);
+        SimpleMatrix lambda_field = new SimpleMatrix(new double[][]{{-grad[3]}, {-grad[4]}, {-grad[5]}});
+        double cosH = Math.cos(-pose.getHeading(AngleUnit.RADIANS));
+        double sinH = Math.sin(-pose.getHeading(AngleUnit.RADIANS));
+        SimpleMatrix rotationMatrix = new SimpleMatrix(new double[][]{{cosH, -sinH, 0}, {sinH, cosH, 0}, {0, 0, 1}});
+        SimpleMatrix lambda = rotationMatrix.mult(lambda_field);
+        SimpleMatrix c = Au.transpose().mult(lambda);
+        if(c.isIdentical(new SimpleMatrix(3,1), 1e-12)) {return new double[]{0, 0, 0};}
+        boolean[] live = new boolean[]{true, true, true};
+        for (int i = 0; i < 3; i++){
+            if (Math.abs(c.get(i)) <= 1e-12) { live[i] = false; }
+        }
+        return findU(c, live);
+    }
+
+    double[] findU(SimpleMatrix c, boolean[] live) {
+        int n = 0;
+        for (boolean axis : live) {
+            if (axis) {n++;}
+        }
+
+        SimpleMatrix sigma = new SimpleMatrix(3, 1);
+        double L = 0;
+        double Q = 0;
+        for (int i = 0; i < 3; i++) {
+            if(!live[i]) continue;
+            sigma.set(i, Math.signum(c.get(i)));
+            L += Math.abs(c.get(i));
+            Q += Math.pow(c.get(i), 2);
+        }
+        double p0 = Math.pow(L, 2)/n;
+        double W = Q - p0;
+
+        if (W <= 1e-12 * Q) return assemble(0, c, sigma, L, n, live);
+
+        double alphaMax = Double.POSITIVE_INFINITY;
+        int drop = -1;
+        for (int i = 0; i < 3; i++) {
+            if(!live[i]) continue;
+            double den = L - n * Math.abs(c.get(i));
+            if (den > 0 && 1/den < alphaMax) {
+                alphaMax = 1/den;
+                drop = i;
+            }
+        }
+
+        double alpha = Math.min(1/Math.pow(L, 2), alphaMax);
+        boolean clamped = false;
+
+        for(int i = 0; i < iterations; i++) {
+            double r2 = (1d/n) + W*Math.pow(alpha, 2);
+            double x = Math.sqrt(r2) / knee;
+            double G = elasticity(x);
+
+            double disc = Math.pow(G*p0, 2) + (4d/n) * W * (G - 1);
+            if (disc < 0) {
+                clamped = true;
+                break;
+            }
+            alpha = (2d/n) / (G*p0 + Math.sqrt(disc));
+
+            if (alpha >= alphaMax) {
+                clamped = true;
+                break;
+            }
+        }
+
+        if (clamped){
+            if (drop < 0) return assemble(0, c, sigma, L, n, live);
+            boolean[] newLive = live.clone();
+            newLive[drop] = false;
+            return findU(c, newLive);
+        }
+
+        return assemble(alpha, c, sigma, L, n, live);
+    }
+
+    double elasticity(double x) {
+        double t = 2*x;
+        if (t < 1e-2) return (Math.pow(t, 2)/6) * (1 - 7 * Math.pow(t, 2) / 60);
+        return 1 - t / Math.sinh(t);
+    }
+
+    double[] assemble(double alpha, SimpleMatrix c, SimpleMatrix sigma, double L, double n, boolean[] live) {
+        double beta = (1 - alpha * L) / n;
+        double[] u = new double[]{0, 0, 0};
+        for (int i = 0; i < 3; i++) {
+            if(!live[i]) continue;
+            u[i] = alpha*c.get(i) + beta*sigma.get(i);
+        }
+        return u;
     }
 
      double[] getGradient(int target) {
-        Pose2D pose = opMode.localizer.getPose();
+         pose = opMode.localizer.getPose();
         return getGradient(target, new double[]{pose.getX(DistanceUnit.CM), pose.getY(DistanceUnit.CM), pose.getHeading(AngleUnit.RADIANS), opMode.localizer.getVelX(DistanceUnit.CM), opMode.localizer.getVelY(DistanceUnit.CM), opMode.localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS)});
     }
 

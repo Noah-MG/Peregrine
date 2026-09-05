@@ -10,8 +10,6 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -46,12 +44,16 @@ public class OptimalityEngine {
     byte[] bytes;
 
     double[][] AuBasic;
-    SimpleMatrix Au;
+    SimpleMatrix AuT;
     double knee;
 
     public static int iterations = 3;
+    public static double deadZone = 0.25;
 
     Pose2D pose;
+
+    double[][] pastStates;
+    public static int window = 4;
 
     public OptimalityEngine(PeregrineOpMode opMode) {
         this.opMode = opMode;
@@ -165,26 +167,56 @@ public class OptimalityEngine {
                 AuBasic[i][j] = model.get("A_u").get(i).get(j).asDouble();
             }
         }
-        Au = new SimpleMatrix(AuBasic);
+        AuT = new SimpleMatrix(AuBasic).transpose();
 
         knee = model.get("control").get("saturation").get("knee").asDouble();
     }
 
     public double[] solve(int target) {
+        if(pastStates == null) pastStates = new double[window][3];
         pose = opMode.localizer.getPose();
         double[] grad = getGradient(target);
-        SimpleMatrix lambda_field = new SimpleMatrix(new double[][]{{-grad[3]}, {-grad[4]}, {-grad[5]}});
+        SimpleMatrix lambdaField = new SimpleMatrix(new double[][]{{-grad[3]}, {-grad[4]}, {-grad[5]}});
         double cosH = Math.cos(-pose.getHeading(AngleUnit.RADIANS));
         double sinH = Math.sin(-pose.getHeading(AngleUnit.RADIANS));
         SimpleMatrix rotationMatrix = new SimpleMatrix(new double[][]{{cosH, -sinH, 0}, {sinH, cosH, 0}, {0, 0, 1}});
-        SimpleMatrix lambda = rotationMatrix.mult(lambda_field);
-        SimpleMatrix c = Au.transpose().mult(lambda);
-        if(c.isIdentical(new SimpleMatrix(3,1), 1e-12)) {return new double[]{0, 0, 0};}
+        SimpleMatrix lambda = rotationMatrix.mult(lambdaField);
+        SimpleMatrix c = AuT.mult(lambda);
         boolean[] live = new boolean[]{true, true, true};
+        double cMax = c.elementMaxAbs();
+        if (cMax <= 1e-12) return new double[]{0, 0, 0};
         for (int i = 0; i < 3; i++){
-            if (Math.abs(c.get(i)) <= 1e-12) { live[i] = false; }
+            if (Math.abs(c.get(i)) <= deadZone*cMax) { live[i] = false; }
         }
-        return findU(c, live);
+        return normalizeL1(boxcar(findU(c, live)));
+    }
+
+    double[] normalizeL1(double[] input) {
+        double l1 = 0;
+        for (double item : input) {
+            l1 += Math.abs(item);
+        }
+        double a = 1/l1;
+        double[] output = input.clone();
+        for (int i = 0; i < output.length; i++) {
+            output[i] *= a;
+        }
+        return output;
+    }
+
+    double[] boxcar(double[] input) { // dishonest
+        for (int i = 0; i < pastStates.length - 1; i++) {
+            pastStates[i] = pastStates[i+1].clone();
+        }
+        pastStates[pastStates.length - 1] = input.clone();
+        double[] sum = pastStates[0].clone();
+        for (int i = 1; i < 3; i++) {
+            for (int j = 1; j < pastStates.length; j++) {
+                sum[i] += pastStates[j][i];
+            }
+            sum[i] /= pastStates.length;
+        }
+        return sum;
     }
 
     double[] findU(SimpleMatrix c, boolean[] live) {
@@ -266,7 +298,6 @@ public class OptimalityEngine {
     }
 
      double[] getGradient(int target) {
-         pose = opMode.localizer.getPose();
         return getGradient(target, new double[]{pose.getX(DistanceUnit.CM), pose.getY(DistanceUnit.CM), pose.getHeading(AngleUnit.RADIANS), opMode.localizer.getVelX(DistanceUnit.CM), opMode.localizer.getVelY(DistanceUnit.CM), opMode.localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS)});
     }
 
@@ -452,5 +483,4 @@ public class OptimalityEngine {
     private double mod(double a, double b) {
         return ((a % b) + b) % b;
     }
-
 }

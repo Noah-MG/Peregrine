@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
 
-import static androidx.core.math.MathUtils.clamp;
-
 import android.content.Context;
 import android.os.Environment;
 
@@ -196,6 +194,7 @@ public class OptimalityEngine {
         for (double item : input) {
             l1 += Math.abs(item);
         }
+        if (l1 == 0) return input;
         double a = 1/l1;
         double[] output = input.clone();
         for (int i = 0; i < output.length; i++) {
@@ -210,7 +209,7 @@ public class OptimalityEngine {
         }
         pastStates[pastStates.length - 1] = input.clone();
         double[] sum = pastStates[0].clone();
-        for (int i = 1; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             for (int j = 1; j < pastStates.length; j++) {
                 sum[i] += pastStates[j][i];
             }
@@ -360,17 +359,12 @@ public class OptimalityEngine {
 
         for (int i = 0; i < 7; i++) {
             values[i] = readValueIdx(target, points[i]);
-            if(!Double.isFinite(values[i])) values[i] = 500;
+            if(!Double.isFinite(values[i])) values[i] = 50000000;
         }
 
         double[] output = new double[6];
 
         for (int i = 0; i < 6; i++) {
-            if(points[i][axisOrder[i]] == points[i+1][axisOrder[i]]) {
-                double sign = 5000000 * Math.signum(manifest.get("grid").get("max").get(axisOrder[i]).asInt() - manifest.get("grid").get("min").get(axisOrder[i]).asInt());
-                output[axisOrder[i]] = points[i][axisOrder[i]] == manifest.get("grid").get("n").get(axisOrder[i]).asInt() - 1 ? sign : -sign;
-                continue;
-            }
             output[axisOrder[i]] = (values[i+1] - values[i])/stepSize[axisOrder[i]];
         }
 
@@ -378,6 +372,11 @@ public class OptimalityEngine {
     }
 
     double readValueIdx(int target, int[] state) {
+        for(int i = 0; i < 6; i++) {
+            if((state[i] < 0 || state[i] >= manifest.get("grid").get("n").get(i).asInt()) && !manifest.get("grid").get("wrap").get(i).asBoolean())
+                return Double.POSITIVE_INFINITY;
+        }
+
         long idx = (((((long) state[0] * manifest.get("grid").get("n").get(1).asInt() + state[1])
                                        * manifest.get("grid").get("n").get(2).asInt() + state[2])
                                        * manifest.get("grid").get("n").get(3).asInt() + state[3])
@@ -397,8 +396,8 @@ public class OptimalityEngine {
         }
 
         switch (dtype) {
-            case "u8":  return manifest.get("encoding").get("scale").asDouble() * parseUint8(bytes);
-            case "u16": return manifest.get("encoding").get("scale").asDouble() * parseUint16(bytes);
+            case "u8":  return parseUint8(bytes);
+            case "u16": return parseUint16(bytes);
             case "f16": return parseFloat16(bytes);
             case "f32": return parseFloat32(bytes);
         }
@@ -408,13 +407,25 @@ public class OptimalityEngine {
     }
 
     double parseUint8(byte[] bytes) {
-        int value = bytes[0] & 0xFF;
-        return value == manifest.get("encoding").get("unreachable").asInt() ? Double.POSITIVE_INFINITY : value;
+        int raw = bytes[0] & 0xFF;
+        if(raw == manifest.get("encoding").get("unreachable").asInt()) return Double.POSITIVE_INFINITY;
+        try {
+            if (manifest.get("encoding").get("escape_codes").asInt() != 0 && raw >= manifest.get("encoding").get("escape_base").asInt())
+                return 50000 + manifest.get("encoding").get("escape_scale").asDouble()
+                        * Math.pow(raw - manifest.get("encoding").get("escape_base").asInt(), 2);
+        } catch (NullPointerException ignored) {}
+        return manifest.get("encoding").get("scale").asDouble() * raw;
     }
 
     double parseUint16(byte[] bytes) {
-        int value = ((bytes[1] & 0xFF) << 8) | (bytes[0] & 0xFF);
-        return value == manifest.get("encoding").get("unreachable").asInt() ? Double.POSITIVE_INFINITY : value;
+        int raw = ((bytes[1] & 0xFF) << 8) | (bytes[0] & 0xFF);
+        if(raw == manifest.get("encoding").get("unreachable").asInt()) return Double.POSITIVE_INFINITY;
+        try {
+            if (manifest.get("encoding").get("escape_codes").asDouble() != 0 && raw >= manifest.get("encoding").get("escape_base").asDouble())
+                return 50000 + manifest.get("encoding").get("escape_scale").asDouble()
+                        * Math.pow(raw - manifest.get("encoding").get("escape_base").asDouble(), 2);
+        } catch (NullPointerException ignored) {}
+        return manifest.get("encoding").get("scale").asDouble() * raw;
     }
 
     double parseFloat16(byte[] bytes) {
@@ -427,14 +438,15 @@ public class OptimalityEngine {
             if (mantissa == 0) {
                 return sign == 0 ? 0.0 : -0.0;
             } else {
-                return Math.copySign(Math.pow(2, -14) * (mantissa / 1024.0), sign == 0 ? 1 : -1);
+                double raw = Math.pow(2, -14) * (mantissa / 1024.0);
+                return sign == 0 ? raw : 50000 + raw;
             }
         } else if (exponent == 31) {
             return Double.POSITIVE_INFINITY;
         }
 
-        double value = (1 + mantissa / 1024.0) * Math.pow(2, exponent - 15);
-        return sign == 0 ? value : -value;
+        double raw = (1 + mantissa / 1024.0) * Math.pow(2, exponent - 15);
+        return sign == 0 ? raw : 50000 + raw;
     }
 
     double parseFloat32(byte[] bytes) {
@@ -442,8 +454,9 @@ public class OptimalityEngine {
                    ((bytes[2] & 0xFF) << 16) |
                    ((bytes[1] & 0xFF) << 8 ) |
                     (bytes[0] & 0xFF);
-        double value = Float.intBitsToFloat(bits);
-        return Double.isNaN(value) ? Double.POSITIVE_INFINITY : value;
+        double raw = Float.intBitsToFloat(bits);
+        if(!Double.isFinite(raw)) return Double.POSITIVE_INFINITY;
+        return raw < 0 ? 50000 + -raw : raw;
     }
 
     public void closeReaders() {
@@ -473,7 +486,7 @@ public class OptimalityEngine {
     }
 
     private double unwrappedClamp(double input, int axis) {
-        return clamp(input, 0, manifest.get("grid").get("n").get(axis).asDouble() - 1);
+        return input;
     }
 
     private double wrappedClamp(double input, int axis) {

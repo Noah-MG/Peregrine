@@ -496,4 +496,43 @@ public class OptimalityEngine {
     private double mod(double a, double b) {
         return ((a % b) + b) % b;
     }
+
+    public double[] getTargetCoords(int target) {
+        double[] output = new double[]{0, 0, 0, 0, 0, 0};
+        for (int i = 0; i < manifest.get("targets").size(); i++) {
+            if (manifest.get("targets").get(i).get("index").asInt() != target) continue;
+            for (int j = 0; j < 6; j++) {
+                output[j] = manifest.get("targets").get(i).get("state").get(j).asDouble();
+            }
+            return output;
+        }
+        throw new NullPointerException("No such target");
+    }
+
+    public SimpleMatrix[] getPIDConstants() {
+        SimpleMatrix[] output = new SimpleMatrix[6];
+        output[0] = new SimpleMatrix(jsonToDoubleMatrix(model.get("honing").get("Kp")));
+        output[1] = new SimpleMatrix(jsonToDoubleMatrix(model.get("honing").get("Ki")));
+        output[2] = new SimpleMatrix(jsonToDoubleMatrix(model.get("honing").get("Kd")));
+        output[3] = new SimpleMatrix(jsonToDoubleMatrix(model.get("honing").get("B_eff_inv")));
+        output[4] = new SimpleMatrix(jsonToDoubleMatrix(model.get("honing").get("Lambda")));
+        output[5] = new SimpleMatrix(jsonToDoubleMatrix(model.get("honing").get("integral_limit").get("value")));
+        return output;
+    }
+
+    private double[][] jsonToDoubleMatrix(JsonNode jsonMatrix) {
+        double[][] output = new double[jsonMatrix.size()][];
+        for(int i = 0; i < jsonMatrix.size(); i++) {
+            if(!jsonMatrix.get(i).isArray()){
+                output[i] = new double[1];
+                output[i][0] = jsonMatrix.get(i).asDouble();
+                continue;
+            }
+            output[i] = new double[jsonMatrix.get(i).size()];
+            for(int j = 0; j < jsonMatrix.get(i).size(); j++) {
+                output[i][j] = jsonMatrix.get(i).get(j).asDouble();
+            }
+        }
+        return output;
+    }
 }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
@@ -43,6 +44,18 @@ public class Localizer extends Task {
 
     public double getHeadingVelocity(UnnormalizedAngleUnit angleUnit) {
         return opMode.hardware.odo.getHeadingVelocity(angleUnit);
+    }
+
+    public double[] getStateVector() {
+        double[] output = new double[6];
+        Pose2D pose = getPose();
+        output[0] = pose.getX(DistanceUnit.CM);
+        output[1] = pose.getY(DistanceUnit.CM);
+        output[2] = pose.getHeading(AngleUnit.RADIANS);
+        output[3] = getVelX(DistanceUnit.CM);
+        output[4] = getVelY(DistanceUnit.CM);
+        output[5] = getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
+        return output;
     }
 
     @Override

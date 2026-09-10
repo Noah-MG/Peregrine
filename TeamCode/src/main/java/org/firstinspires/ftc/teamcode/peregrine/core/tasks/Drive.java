@@ -66,16 +66,14 @@ public class Drive extends Task {
         double[] control = opMode.optimalityEngine.solve(target);
         distSq = Math.pow(opMode.localizer.getPose().getX(DistanceUnit.CM) - targetState[0], 2)
                + Math.pow(opMode.localizer.getPose().getY(DistanceUnit.CM) - targetState[1], 2);
-        // NOTE: the heading differences below are not wrapped to [-pi, pi], so a target near +/-pi can
-        // look far away when it is not.
         if (distSq < Math.pow(DoneDist, 2) &&
-                Math.abs(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2]) < DoneAng){
+                mod(Math.abs(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2]), 2*Math.PI) < DoneAng){
             // Phase 3: arrived.
             Kinematics.powerMotors(0, 0, 0, opMode);
             return true;
         } else if (Arrays.equals(control, new double[]{0, 0, 0}) ||
                 (distSq < Math.pow(PIDDist, 2) &&
-                        Math.abs(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2]) < PIDAng)) {
+                        mod(Math.abs(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2]), 2*Math.PI) < PIDAng)) {
             // Phase 2: honing PID. Also the fallback whenever the table gives no usable gradient.
             pidHold.run();
             return false;
@@ -94,5 +92,10 @@ public class Drive extends Task {
     @Override
     public Task reset() {
         return new Drive(opMode, targetName);
+    }
+
+    // Always-non-negative modulo. Java's % keeps the sign of the dividend.
+    private double mod(double a, double b) {
+        return ((a % b) + b) % b;
     }
 }

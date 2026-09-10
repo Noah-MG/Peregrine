@@ -9,6 +9,17 @@ import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelRaceTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 import org.firstinspires.ftc.teamcode.peregrine.editables.RobotParams;
 
+/**
+ * <h3>Drivetrain calibration teleop</h3>
+ *
+ * <p>The driver drives by hand while every loop's motor powers, pose and velocity are written to a CSV
+ * on the SD card. The desktop fitter ({@code calibration/fit_drivetrain.py}) regresses those logs into
+ * the drivetrain model stored in MODEL.JSON (TABLE_FORMAT.MD §8.6). Drive on the same surface you
+ * will compete on, and make sure some of the run pushes past the traction limit so the knee can be fit.</p>
+ *
+ * <p>Note: PeregrineOpMode always constructs an OptimalityEngine, so this opMode also stops if the
+ * SD card has no MANIFEST.JSON / MODEL.JSON.</p>
+ */
 @TeleOp
 public class Calibration extends PeregrineTeleop {
 
@@ -20,9 +31,11 @@ public class Calibration extends PeregrineTeleop {
         movement = new CalibrationMovement(this);
         logger = new CalibrationLogger(this);
 
+        // Neither task ever returns true, so the race runs until the opMode is stopped.
         return new ParallelRaceTask(movement, logger);
     }
 
+    // Calibration only needs relative motion, so start at the origin.
     @Override
     public Pose2D startingPose() {
         return new Pose2D(RobotParams.distanceUnit, 0, 0, AngleUnit.RADIANS, 0);

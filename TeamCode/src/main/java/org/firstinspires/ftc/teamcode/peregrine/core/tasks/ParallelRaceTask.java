@@ -7,6 +7,10 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * <p>Input a set of tasks into the constructor, and upon running the ParallelRaceTask, all of the
  * inputs will be played simultaneously. The task will have completed once one of its components
  * has completed.</p>
+ *
+ * <p>Internally it is a binary tree: more than two tasks become a nested ParallelRaceTask plus the
+ * last task. The "losing" tasks are not ended automatically when the race finishes. Call end() on
+ * this task to do that.</p>
  */
 
 public class ParallelRaceTask extends Task {
@@ -34,6 +38,7 @@ public class ParallelRaceTask extends Task {
             taskOne = tasks[0];
             taskTwo = tasks[1];
         } else if (tasks.length == 1) {
+            // NOTE: EmptyTask finishes immediately, so a single-task race ends after one tick.
             taskOne = new EmptyTask();
             taskTwo = tasks[0];
         } else {
@@ -42,6 +47,7 @@ public class ParallelRaceTask extends Task {
         }
     }
 
+    // Ticks both children every loop and finishes as soon as either one reports done.
     public boolean run() {
         taskOneDone = taskOne.run();
         taskTwoDone = taskTwo.run();

@@ -7,13 +7,22 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Enums;
 
+/**
+ * <h3>Robot-specific constants.</h3>
+ *
+ * <p>{@code @Config} makes these editable live from FTC Dashboard. Most are only read when Hardware
+ * is constructed, though, so changes take effect on the next opMode init.</p>
+ */
 @Config
 public final class RobotParams {
 
+    // Selects the wheel-power mixing in Kinematics.powerMotors.
     public static Enums.Chassis chassis = Enums.Chassis.MECANUM;
 
+    // Unit for odoXOffset/odoYOffset and Calibration's starting pose. The table code always works in CM.
     public static DistanceUnit distanceUnit = DistanceUnit.CM;
 
+    // Pinpoint pod offsets from the tracking centre, in distanceUnit (see the goBILDA Pinpoint docs for the sign convention).
     public static double odoXOffset = 4.958;
     public static double odoYOffset = -18.858;
     public static GoBildaPinpointDriver.GoBildaOdometryPods podType = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
@@ -21,6 +30,7 @@ public final class RobotParams {
     public static GoBildaPinpointDriver.EncoderDirection yEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
 
 
+    // Set so that a positive power drives each wheel forward.
     public static DcMotor.Direction FRDirection = DcMotor.Direction.REVERSE;
     public static DcMotor.Direction FLDirection = DcMotor.Direction.FORWARD;
     public static DcMotor.Direction BRDirection = DcMotor.Direction.REVERSE;

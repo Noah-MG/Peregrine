@@ -7,6 +7,9 @@ import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
  *
  *  <p>Examples of this include: changing a servo position, moving across the field, or running an
  *  entire autonomous. This is achieved by running the run() function in a loop.</p>
+ *
+ *  <p>Tasks are composed into trees with SeriesTask, ParallelTask and ParallelRaceTask. The root is
+ *  ticked once per loop by PeregrineOpMode.</p>
  */
 
 public abstract class Task {
@@ -14,11 +17,13 @@ public abstract class Task {
     /**
      * Stores the opMode itself, from which most references to things running independently of this
      * task derive.
+     *
+     * <p>Most subclasses currently declare their own {@code opMode} field that hides this one.</p>
      */
     protected PeregrineOpMode opMode;
 
     /**
-     * Executes the task. Should be run in a loop until it returns false.
+     * Executes the task. Should be run in a loop until it returns true.
      *
      * @return Whether the task has finished. Unending tasks always return false.
      */

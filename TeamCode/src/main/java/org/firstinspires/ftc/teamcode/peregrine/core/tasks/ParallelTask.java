@@ -7,6 +7,10 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * <p>Input a set of tasks into the constructor, and upon running the ParallelTask, all of the
  * inputs will be played simultaneously. The task will have completed once all of its components
  * have completed.</p>
+ *
+ * <p>Internally it is a binary tree: more than two tasks become a nested ParallelTask plus the last
+ * task. A child that has already finished keeps having run() called every loop until both are done,
+ * so children must tolerate being run again after returning true.</p>
  */
 
 public class ParallelTask extends Task {
@@ -42,6 +46,7 @@ public class ParallelTask extends Task {
         }
     }
 
+    // Ticks both children every loop. Done only when both report done on the same tick.
     public boolean run() {
         taskOneDone = taskOne.run();
         taskTwoDone = taskTwo.run();

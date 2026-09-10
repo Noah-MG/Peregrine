@@ -37,6 +37,11 @@ public abstract class PeregrineOpMode extends LinearOpMode {
      */
     public Telemetry telem;
 
+    /**
+     * Reads the SD-card value tables and drivetrain model and turns them into drive commands. It is
+     * constructed for every opMode. If the card or tables are missing it requests a stop, see
+     * OptimalityEngine.
+     */
     public OptimalityEngine optimalityEngine;
 
     /**
@@ -48,8 +53,10 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     //This is the regular opMode function, being mapped to those below
     public void runOpMode() {
 
+        // Construction order matters: Localizer needs hardware and telem, and OptimalityEngine needs telem.
         telem = FtcDashboard.getInstance().getTelemetry();
         hardware = new Hardware(this);
+        // Blocks until the Pinpoint reports READY, then sets its pose to startingPose().
         localizer = new Localizer(this, startingPose());
         optimalityEngine = new OptimalityEngine(this);
         globalVariables = new GlobalVariables();
@@ -64,6 +71,8 @@ public abstract class PeregrineOpMode extends LinearOpMode {
 
         mainStart();
 
+        // Tick the task tree until it reports done (mainLoop() returns true) or the opMode is stopped.
+        // telem goes to FTC Dashboard and telemetry goes to the Driver Station.
         while(opModeIsActive() && !mainLoop()) {
             telem.update();
             telemetry.update();

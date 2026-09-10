@@ -19,21 +19,35 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * <h3>Logs motor powers and odometry state to a timestamped CSV on the SD card, once per loop.</h3>
+ *
+ * <p>Columns: {@code timestamp (ms since construction), FR, FL, BR, BL (motor powers), x, y (cm),
+ * h (rad), x_vel, y_vel (cm/s), h_vel (rad/s)}. Pose and velocities are field frame, as reported by
+ * the Pinpoint. These logs are the input to the desktop drivetrain fit (TABLE_FORMAT.MD §8.6).</p>
+ *
+ * <p>Never finishes on its own: run() always returns false.</p>
+ */
 public class CalibrationLogger extends Task {
 
     PeregrineOpMode opMode;
 
+    // Cleared when the card is missing or a write fails.
     boolean sdInserted = true;
+    // NOTE: unlike OptimalityEngine.findSdCard(), this is the app-specific directory on the card
+    // (/storage/XXXX-XXXX/Android/data/<package>/files), not the card root, so logs land in <that>/logs.
     File sdCard;
     FileWriter writer;
     File logFile;
 
+    // Measures the timestamp column.
     ElapsedTime time;
 
     public CalibrationLogger(PeregrineOpMode opMode) {
         this.opMode = opMode;
 
         sdCard = findSdCard();
+        // Error code "1": no removable storage found.
         if(!sdInserted || sdCard == null) {
             opMode.telem.addLine("1");
             opMode.telem.update();
@@ -43,6 +57,7 @@ public class CalibrationLogger extends Task {
 
         File logDir = new File(sdCard, "logs");
         if(!logDir.exists()) {
+            // Error code "2": the logs directory could not be created (usually the card is not mounted).
             if(!logDir.mkdirs()) {
                 sdInserted = false;
                 opMode.telem.addData("Mounted", Environment.getExternalStorageState(sdCard).equals(Environment.MEDIA_MOUNTED));
@@ -53,6 +68,7 @@ public class CalibrationLogger extends Task {
             }
         }
 
+        // One new file per construction, e.g. calibration_log_20260910_153000.csv.
         logFile = new File(logDir, "calibration_log_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date()) + ".csv");
 
         try {
@@ -70,6 +86,7 @@ public class CalibrationLogger extends Task {
         time = new ElapsedTime();
     }
 
+    /** Appends one CSV row with the current motor powers and odometry state. It flushes every row, so a crash loses at most one line. */
     @Override
     public boolean run() {
         double FR = opMode.hardware.FR.getPower();
@@ -86,6 +103,7 @@ public class CalibrationLogger extends Task {
         double h_vel = opMode.localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
 
         try{
+            // Distance from the origin, handy for checking odometry drift by eye.
             opMode.telem.addData("0 distance", Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
             opMode.telem.addData("data", time.milliseconds() + "," + FR + "," + FL + "," + BR + "," + BL + "," + x + "," + y + "," + h + "," + x_vel + "," + y_vel + "," + h_vel);
             writer.write(time.milliseconds() + "," + FR + "," + FL + "," + BR + "," + BL + "," + x + "," + y + "," + h + "," + x_vel + "," + y_vel + "," + h_vel + "\n");
@@ -99,16 +117,19 @@ public class CalibrationLogger extends Task {
         return false;
     }
 
+    // NOTE: the FileWriter is never closed. Each row is flushed, so no data is lost.
     @Override
     public boolean end() {
         return false;
     }
 
+    // Starts a brand-new log file.
     @Override
     public Task reset() {
         return new CalibrationLogger(opMode);
     }
 
+    // Returns the app-specific directory on the first removable volume, or null (and clears sdInserted).
     File findSdCard() {
         Context context = AppUtil.getInstance().getActivity();
         try {

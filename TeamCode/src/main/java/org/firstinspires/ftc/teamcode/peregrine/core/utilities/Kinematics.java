@@ -3,8 +3,17 @@ package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
 import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.editables.RobotParams;
 
+/** Converts a robot-centric (body frame) command into individual wheel powers. */
 public final class Kinematics {
 
+    /**
+     * Sets the drive motor powers for a body-frame command. This is the same {@code [fwd, strafe, turn]}
+     * command space that MODEL.JSON's "control" block uses (TABLE_FORMAT.MD §8.1).
+     *
+     * @param y forward command, -1..1
+     * @param x strafe command, -1..1
+     * @param h turn command, -1..1
+     */
     public static void powerMotors(double y, double x, double h, PeregrineOpMode opMode) {
         switch(RobotParams.chassis) {
             case MECANUM:
@@ -32,6 +41,7 @@ public final class Kinematics {
 
                 break;
             default:
+                // Other chassis types are not implemented, so the command is silently ignored.
                 //freak the frickity flip out and crash and burn and explode
                 break;
         }

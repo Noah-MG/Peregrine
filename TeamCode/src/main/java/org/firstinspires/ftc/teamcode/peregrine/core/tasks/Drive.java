@@ -66,13 +66,13 @@ public class Drive extends Task {
         distSq = Math.pow(opMode.localizer.getPose().getX(DistanceUnit.CM) - targetState[0], 2)
                + Math.pow(opMode.localizer.getPose().getY(DistanceUnit.CM) - targetState[1], 2);
         if (distSq < Math.pow(DoneDist, 2) &&
-                mod(Math.abs(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2]), 2*Math.PI) < DoneAng){
+                Math.abs(mod(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2] + Math.PI, 2*Math.PI) - Math.PI) < DoneAng){
             // Phase 3: arrived.
             Kinematics.powerMotors(0, 0, 0, opMode);
             return true;
         } else if (Arrays.equals(control, new double[]{0, 0, 0}) ||
                 (distSq < Math.pow(PIDDist, 2) &&
-                        mod(Math.abs(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2]), 2*Math.PI) < PIDAng)) {
+                        Math.abs(mod(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2] + Math.PI, 2*Math.PI) - Math.PI) < PIDAng)) {
             // Phase 2: honing PID. Also the fallback whenever the table gives no usable gradient.
             pidHold.run();
             return false;

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
+import com.acmerobotics.dashboard.config.Config;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
@@ -8,6 +10,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 import java.util.Arrays;
 
+@Config
 public class Drive extends Task {
 
     PeregrineOpMode opMode;
@@ -46,6 +49,7 @@ public class Drive extends Task {
                 (distSq < Math.pow(PIDDist, 2) &&
                         Math.abs(opMode.localizer.getPose().getHeading(AngleUnit.RADIANS) - targetState[2]) < PIDAng)) {
             pidHold.run();
+            return false;
         }
         Kinematics.powerMotors(control[0], control[1], control[2], opMode);
         return false;

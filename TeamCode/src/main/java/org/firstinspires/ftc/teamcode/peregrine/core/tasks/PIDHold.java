@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
 import static androidx.core.math.MathUtils.clamp;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.ejml.simple.SimpleMatrix;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Kinematics;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
+@Config
 public class PIDHold extends Task {
 
     PeregrineOpMode opMode;

@@ -12,8 +12,6 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  */
 public class TeleopMovement extends Task {
 
-    PeregrineOpMode opMode;
-
     public TeleopMovement(PeregrineOpMode opMode) {
         this.opMode = opMode;
     }

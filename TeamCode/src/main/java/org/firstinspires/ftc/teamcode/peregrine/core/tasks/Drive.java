@@ -28,7 +28,6 @@ import java.util.Arrays;
 @Config
 public class Drive extends Task {
 
-    PeregrineOpMode opMode;
     String targetName;
     // Target index into the OptimalityEngine tables.
     int target;

@@ -17,8 +17,6 @@ public abstract class Task {
     /**
      * Stores the opMode itself, from which most references to things running independently of this
      * task derive.
-     *
-     * <p>Most subclasses currently declare their own {@code opMode} field that hides this one.</p>
      */
     protected PeregrineOpMode opMode;
 

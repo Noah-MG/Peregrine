@@ -29,7 +29,6 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 @Config
 public class PIDHold extends Task {
 
-    PeregrineOpMode opMode;
     String targetName;
     int target;
     // Target state as a 6x1 column [x, y, h, vx, vy, w], field frame.

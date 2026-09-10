@@ -21,8 +21,6 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  */
 public class Localizer extends Task {
 
-    PeregrineOpMode opMode;
-
     Pose2D startingPose;
 
     /**

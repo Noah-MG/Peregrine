@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  */
 public class DriveTeleopMecanum extends Task {
 
-    // Unlike most tasks, this uses the opMode field inherited from Task instead of declaring its own.
     public DriveTeleopMecanum(PeregrineOpMode opMode) {
         this.opMode = opMode;
     }

@@ -45,8 +45,8 @@ public class OptimalityEngine {
     SimpleMatrix AuT;
     double knee;
 
-    public static int iterations = 3;
-    public static double deadZone = 0.25;
+    public static int iterations = 6;
+    public static double deadZone = 0.3;
 
     Pose2D pose;
 

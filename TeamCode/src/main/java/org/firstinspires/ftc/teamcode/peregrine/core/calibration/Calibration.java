@@ -6,6 +6,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineTeleop;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelRaceTask;
+import org.firstinspires.ftc.teamcode.peregrine.core.tasks.TeleopMovement;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 import org.firstinspires.ftc.teamcode.peregrine.editables.RobotParams;
 
@@ -28,7 +29,7 @@ public class Calibration extends PeregrineTeleop {
 
     @Override
     public Task defineTasks() {
-        movement = new CalibrationMovement(this);
+        movement = new TeleopMovement(this);
         logger = new CalibrationLogger(this);
 
         // Neither task ever returns true, so the race runs until the opMode is stopped.

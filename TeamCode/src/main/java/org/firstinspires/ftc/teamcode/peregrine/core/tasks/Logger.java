@@ -160,7 +160,7 @@ public class Logger extends Task {
 
             for(File dir : externalDirs) {
                 if (dir == null) continue;
-                if (Environment.isExternalStorageRemovable(dir)) return dir;
+                if (Environment.isExternalStorageRemovable(dir)) return dir.getParentFile().getParentFile().getParentFile().getParentFile();
             }
         } catch (Exception ignored) {}
         sdInserted = false;

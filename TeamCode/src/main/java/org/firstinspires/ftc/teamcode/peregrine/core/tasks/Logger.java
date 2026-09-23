@@ -28,7 +28,7 @@ import java.util.function.DoubleSupplier;
  */
 public class Logger extends Task {
 
-    class LogItem {
+    static class LogItem {
         String name;
         DoubleSupplier evaluator;
 
@@ -43,7 +43,7 @@ public class Logger extends Task {
     }
 
     ArrayList<LogItem> logItems;
-    Boolean hasRun;
+    boolean hasRun;
 
     PeregrineOpMode opMode;
 
@@ -66,10 +66,7 @@ public class Logger extends Task {
         sdCard = findSdCard();
         // Error code "1": no removable storage found.
         if(!sdInserted || sdCard == null) {
-            opMode.telem.addLine("1");
-            opMode.telem.update();
-            opMode.requestOpModeStop();
-            return;
+            throw new IllegalStateException("No removable storage found.");
         }
 
         File logDir = new File(sdCard, "logs");
@@ -77,11 +74,10 @@ public class Logger extends Task {
             // Error code "2": the logs directory could not be created (usually the card is not mounted).
             if(!logDir.mkdirs()) {
                 sdInserted = false;
-                opMode.telem.addData("Mounted", Environment.getExternalStorageState(sdCard).equals(Environment.MEDIA_MOUNTED));
-                opMode.telem.addLine("2");
-                opMode.telem.update();
-                opMode.requestOpModeStop();
-                return;
+                if (!Environment.getExternalStorageState(sdCard).equals(Environment.MEDIA_MOUNTED)) {
+                    throw new IllegalStateException("Card not mounted, ensure it's formatted to FAT32");
+                }
+                throw new IllegalStateException("Log directory couldn't be created");
             }
         }
 
@@ -93,29 +89,22 @@ public class Logger extends Task {
             writer.write("timestamp");
             writer.flush();
         } catch (Exception e) {
-            opMode.telem.addData("Exception", e);
-            opMode.telem.update();
-            sdInserted = false;
-            opMode.requestOpModeStop();
-            return;
+            try{ writer.close(); } catch (Exception ignored) {}
+            throw new RuntimeException("unexpected error while writing log", e);
         }
 
         time = new ElapsedTime();
     }
 
     public void addLogItem(String name, DoubleSupplier value) {
-        if(hasRun) return; // TODO: make this output an error code
+        if(hasRun) throw new IllegalStateException("New log items can only be added before logger is run");
         logItems.add(new LogItem(name, value));
-
         try {
             writer.write("," + name);
             writer.flush();
         } catch (Exception e) {
-            opMode.telem.addData("Exception", e);
-            opMode.telem.update();
-            sdInserted = false;
-            opMode.requestOpModeStop();
-            return;
+            try{ writer.close(); } catch (Exception ignored) {}
+            throw new RuntimeException("unexpected error while writing log", e);
         }
     }
 
@@ -130,11 +119,8 @@ public class Logger extends Task {
             }
             writer.flush();
         } catch (Exception e) {
-            opMode.telem.addData("Exception", e);
-            opMode.telem.update();
-            sdInserted = false;
-            opMode.requestOpModeStop();
-            return true;
+            try{ writer.close(); } catch (Exception ignored) {}
+            throw new RuntimeException("unexpected error while writing log", e);
         }
         return false;
     }
@@ -162,7 +148,9 @@ public class Logger extends Task {
                 if (dir == null) continue;
                 if (Environment.isExternalStorageRemovable(dir)) return dir.getParentFile().getParentFile().getParentFile().getParentFile();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error while finding SD Card", e);
+        }
         sdInserted = false;
         return null;
     }

@@ -1,14 +1,10 @@
-package org.firstinspires.ftc.teamcode.peregrine.core.calibration;
+package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
 import android.content.Context;
 import android.os.Environment;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
@@ -16,8 +12,10 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.function.DoubleSupplier;
 
 /**
  * <h3>Logs motor powers and odometry state to a timestamped CSV on the SD card, once per loop.</h3>
@@ -28,7 +26,24 @@ import java.util.Locale;
  *
  * <p>Never finishes on its own: run() always returns false.</p>
  */
-public class CalibrationLogger extends Task {
+public class Logger extends Task {
+
+    class LogItem {
+        String name;
+        DoubleSupplier evaluator;
+
+        public LogItem(String name, DoubleSupplier evaluator) {
+            this.name = name;
+            this.evaluator = evaluator;
+        }
+
+        public double evaluate() {
+            return evaluator.getAsDouble();
+        }
+    }
+
+    ArrayList<LogItem> logItems;
+    Boolean hasRun;
 
     PeregrineOpMode opMode;
 
@@ -43,8 +58,10 @@ public class CalibrationLogger extends Task {
     // Measures the timestamp column.
     ElapsedTime time;
 
-    public CalibrationLogger(PeregrineOpMode opMode) {
+    public Logger(PeregrineOpMode opMode) {
         this.opMode = opMode;
+        logItems = new ArrayList<>();
+        hasRun = false;
 
         sdCard = findSdCard();
         // Error code "1": no removable storage found.
@@ -73,7 +90,7 @@ public class CalibrationLogger extends Task {
 
         try {
             writer = new FileWriter(logFile, true);
-            writer.write("timestamp,FR,FL,BR,BL,x,y,h,x_vel,y_vel,h_vel\n");
+            writer.write("timestamp");
             writer.flush();
         } catch (Exception e) {
             opMode.telem.addData("Exception", e);
@@ -86,33 +103,38 @@ public class CalibrationLogger extends Task {
         time = new ElapsedTime();
     }
 
-    /** Appends one CSV row with the current motor powers and odometry state. It flushes every row, so a crash loses at most one line. */
-    @Override
-    public boolean run() {
-        double FR = opMode.hardware.FR.getPower();
-        double FL = opMode.hardware.FL.getPower();
-        double BR = opMode.hardware.BR.getPower();
-        double BL = opMode.hardware.BL.getPower();
+    public void addLogItem(String name, DoubleSupplier value) {
+        if(hasRun) return; // TODO: make this output an error code
+        logItems.add(new LogItem(name, value));
 
-        Pose2D pose = opMode.localizer.getPose();
-        double x = pose.getX(DistanceUnit.CM);
-        double y = pose.getY(DistanceUnit.CM);
-        double h = pose.getHeading(AngleUnit.RADIANS);
-        double x_vel = opMode.localizer.getVelX(DistanceUnit.CM);
-        double y_vel = opMode.localizer.getVelY(DistanceUnit.CM);
-        double h_vel = opMode.localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
-
-        try{
-            // Distance from the origin, handy for checking odometry drift by eye.
-            opMode.telem.addData("0 distance", Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-            opMode.telem.addData("data", time.milliseconds() + "," + FR + "," + FL + "," + BR + "," + BL + "," + x + "," + y + "," + h + "," + x_vel + "," + y_vel + "," + h_vel);
-            writer.write(time.milliseconds() + "," + FR + "," + FL + "," + BR + "," + BL + "," + x + "," + y + "," + h + "," + x_vel + "," + y_vel + "," + h_vel + "\n");
+        try {
+            writer.write("," + name);
             writer.flush();
         } catch (Exception e) {
             opMode.telem.addData("Exception", e);
             opMode.telem.update();
             sdInserted = false;
             opMode.requestOpModeStop();
+            return;
+        }
+    }
+
+    /** Appends one CSV row with the current motor powers and odometry state. It flushes every row, so a crash loses at most one line. */
+    @Override
+    public boolean run() {
+        hasRun = true;
+        try {
+            writer.write("\n" + time.milliseconds());
+            for (LogItem logItem : logItems) {
+                writer.write("," + logItem.evaluate());
+            }
+            writer.flush();
+        } catch (Exception e) {
+            opMode.telem.addData("Exception", e);
+            opMode.telem.update();
+            sdInserted = false;
+            opMode.requestOpModeStop();
+            return true;
         }
         return false;
     }
@@ -126,7 +148,7 @@ public class CalibrationLogger extends Task {
     // Starts a brand-new log file.
     @Override
     public Task reset() {
-        return new CalibrationLogger(opMode);
+        return new Logger(opMode);
     }
 
     // Returns the app-specific directory on the first removable volume, or null (and clears sdInserted).

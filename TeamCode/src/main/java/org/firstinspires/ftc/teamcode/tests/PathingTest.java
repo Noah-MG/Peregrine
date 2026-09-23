@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.peregrine.core.calibration.CalibrationLogger;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Logger;
 import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineAutonomous;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Drive;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelTask;
@@ -34,7 +35,20 @@ public class PathingTest extends PeregrineAutonomous {
     // The logger never finishes, so this ParallelTask keeps running after Drive arrives, until stop.
     @Override
     public Task defineTasks() {
-        return new ParallelTask(new Drive(this, target), new CalibrationLogger(this));
+        Drive drive = new Drive(this, target);
+        Logger logger = new Logger(this);
+        logger.addLogItem("FR", () -> hardware.FR.getPower());
+        logger.addLogItem("FL", () -> hardware.FL.getPower());
+        logger.addLogItem("BR", () -> hardware.BR.getPower());
+        logger.addLogItem("BL", () -> hardware.BL.getPower());
+        logger.addLogItem("x",  () -> localizer.getPose().getX(DistanceUnit.CM));
+        logger.addLogItem("y",  () -> localizer.getPose().getY(DistanceUnit.CM));
+        logger.addLogItem("h",  () -> localizer.getPose().getHeading(AngleUnit.RADIANS));
+        logger.addLogItem("x_vel", () -> localizer.getVelX(DistanceUnit.CM));
+        logger.addLogItem("y_vel", () -> localizer.getVelY(DistanceUnit.CM));
+        logger.addLogItem("h_vel", () -> localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS));
+
+        return new ParallelTask(drive, logger);
     }
 
     @Override

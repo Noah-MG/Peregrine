@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.opModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -54,7 +55,7 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     public void runOpMode() {
 
         // Construction order matters: Localizer needs hardware and telem, and OptimalityEngine needs telem.
-        telem = FtcDashboard.getInstance().getTelemetry();
+        telem = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         hardware = new Hardware(this);
         // Blocks until the Pinpoint reports READY, then sets its pose to startingPose().
         localizer = new Localizer(this, startingPose());

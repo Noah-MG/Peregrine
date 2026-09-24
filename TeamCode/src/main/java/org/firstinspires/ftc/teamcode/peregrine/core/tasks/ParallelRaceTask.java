@@ -55,8 +55,9 @@ public class ParallelRaceTask extends CompoundTask {
         return taskOneDone || taskTwoDone;
     }
 
-    public boolean end() {
-        return taskOne.end() && taskTwo.end();
+    public void end() {
+        taskOne.end();
+        taskTwo.end();
     }
 
     public Task reset() {

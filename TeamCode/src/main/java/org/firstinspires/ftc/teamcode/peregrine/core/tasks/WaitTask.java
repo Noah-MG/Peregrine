@@ -24,9 +24,7 @@ public class WaitTask extends Task {
     }
 
     @Override
-    public boolean end() {
-        return false;
-    }
+    public void end() {}
 
     @Override
     public Task reset() {

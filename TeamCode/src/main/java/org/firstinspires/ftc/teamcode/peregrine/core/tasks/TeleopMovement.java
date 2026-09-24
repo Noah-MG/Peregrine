@@ -25,8 +25,8 @@ public class TeleopMovement extends Task {
 
     // NOTE: does not stop the motors.
     @Override
-    public boolean end() {
-        return false;
+    public void end() {
+        Kinematics.powerMotors(0, 0, 0, opMode);
     }
 
     @Override

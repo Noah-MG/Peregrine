@@ -89,9 +89,8 @@ public class Drive extends Task {
     }
 
     @Override
-    public boolean end() {
+    public void end() {
         Kinematics.powerMotors(0, 0, 0, opMode);
-        return true;
     }
 
     @Override

@@ -29,10 +29,9 @@ public abstract class Task {
 
     /**
      * Puts the task into a safe end state if it must be ended early, for example at the end of a
-     * ParallelRaceTask
-     * @return Whether the task has finished ending.
+     * ParallelRaceTask. Gets called if the task is run for the last time and returns false.
      */
-    public abstract boolean end();
+    public abstract void end();
 
     /**
      * Returns a fresh copy of the task, resetting all changes.

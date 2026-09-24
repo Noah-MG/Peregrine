@@ -127,9 +127,7 @@ public class Logger extends Task {
 
     // NOTE: the FileWriter is never closed. Each row is flushed, so no data is lost.
     @Override
-    public boolean end() {
-        return false;
-    }
+    public void end() {}
 
     // Starts a brand-new log file.
     @Override

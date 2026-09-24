@@ -88,9 +88,7 @@ public class Localizer extends Task {
     }
 
     @Override
-    public boolean end() {
-        return false;
-    }
+    public void end() {}
 
     // NOTE: constructing a new Localizer resets the Pinpoint and puts the pose back at startingPose.
     @Override

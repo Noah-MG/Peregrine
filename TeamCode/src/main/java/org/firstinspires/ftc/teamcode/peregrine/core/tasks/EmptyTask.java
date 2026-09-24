@@ -16,9 +16,7 @@ public class EmptyTask extends Task {
         return true;
     }
 
-    public boolean end() {
-        return true;
-    }
+    public void end() {}
 
     public Task reset() {
         return new EmptyTask();

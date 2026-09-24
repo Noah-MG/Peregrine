@@ -146,7 +146,7 @@ public class Logger extends Task {
 
             for(File dir : externalDirs) {
                 if (dir == null) continue;
-                if (Environment.isExternalStorageRemovable(dir)) return dir.getParentFile().getParentFile().getParentFile().getParentFile();
+                if (Environment.isExternalStorageRemovable(dir)) return dir;
             }
         } catch (Exception e) {
             throw new RuntimeException("Unexpected error while finding SD Card", e);

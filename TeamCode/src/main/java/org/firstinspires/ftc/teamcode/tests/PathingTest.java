@@ -72,8 +72,8 @@ public class PathingTest extends PeregrineOpMode {
     }
 
     @Override
-    public boolean mainLoop() {
-        return false;
+    public void mainLoop() {
+
     }
 
     @Override

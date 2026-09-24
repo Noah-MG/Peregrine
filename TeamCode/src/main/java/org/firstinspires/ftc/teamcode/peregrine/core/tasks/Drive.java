@@ -53,7 +53,11 @@ public class Drive extends Task {
     public Drive(PeregrineOpMode opMode, String target) {
         this.opMode = opMode;
         targetName = target;
-        this.target = opMode.optimalityEngine.targets.get(targetName);
+        try {
+            this.target = opMode.optimalityEngine.targets.get(targetName);
+        } catch (NullPointerException e) {
+            throw new NullPointerException("Invalid target name, no such target present on SD Card.");
+        }
         targetState = opMode.optimalityEngine.getTargetCoords(this.target);
 
         pidHold = new PIDHold(opMode, target);

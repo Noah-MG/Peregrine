@@ -77,7 +77,8 @@ public abstract class PeregrineOpMode extends LinearOpMode {
 
         // Tick the task tree until it reports done (mainLoop() returns true) or the opMode is stopped.
         // telem goes to FTC Dashboard and telemetry goes to the Driver Station.
-        while(opModeIsActive() && !mainLoop()) {
+        while(opModeIsActive() && !tree.run()) {
+            mainLoop();
             telem.update();
             telemetry.update();
         }
@@ -99,7 +100,7 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     public abstract void mainStart();
 
     /**Is run repeatedly after the start button is pressed, it is where the main body of code is run.*/
-    public abstract boolean mainLoop();
+    public abstract void mainLoop();
 
     /**Is run once at the end of the opMode.*/
     public abstract void end();

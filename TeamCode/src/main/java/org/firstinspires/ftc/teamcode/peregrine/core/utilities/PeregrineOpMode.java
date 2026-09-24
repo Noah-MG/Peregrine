@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.peregrine.core.opModes;
+package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Localizer;
-import org.firstinspires.ftc.teamcode.peregrine.core.utilities.OptimalityEngine;
+import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelTask;
 import org.firstinspires.ftc.teamcode.peregrine.editables.GlobalVariables;
 import org.firstinspires.ftc.teamcode.peregrine.editables.Hardware;
 
@@ -45,6 +45,8 @@ public abstract class PeregrineOpMode extends LinearOpMode {
      */
     public OptimalityEngine optimalityEngine;
 
+    Task tree;
+
     /**
      * This function should return the pose of the robot when init is pressed
      * @return The pose of the robot when init is pressed
@@ -62,6 +64,7 @@ public abstract class PeregrineOpMode extends LinearOpMode {
         optimalityEngine = new OptimalityEngine(this);
         globalVariables = new GlobalVariables();
 
+        tree = new ParallelTask(localizer, defineTasks());
         initStart();
 
         while(opModeInInit()) {
@@ -79,10 +82,12 @@ public abstract class PeregrineOpMode extends LinearOpMode {
             telemetry.update();
         }
 
+        tree.end();
         optimalityEngine.closeReaders();
         end();
-
     }
+
+    public abstract Task defineTasks();
 
     /**Is run once at the start of init.*/
     public abstract void initStart();

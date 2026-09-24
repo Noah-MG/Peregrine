@@ -6,7 +6,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**

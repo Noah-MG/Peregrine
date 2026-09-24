@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
 
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
-
 /**
  *  <h3>The class that represents any action the robot might take, no matter how complicated</h3>
  *

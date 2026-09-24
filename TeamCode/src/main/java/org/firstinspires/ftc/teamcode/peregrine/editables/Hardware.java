@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.peregrine.editables;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 
 /**
  * <h3>All robot hardware, mapped once per opMode.</h3>

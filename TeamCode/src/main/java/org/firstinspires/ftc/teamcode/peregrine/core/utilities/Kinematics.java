@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
 
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.editables.RobotParams;
 
 /** Converts a robot-centric (body frame) command into individual wheel powers. */

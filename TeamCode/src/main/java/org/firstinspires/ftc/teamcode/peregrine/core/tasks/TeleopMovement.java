@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Kinematics;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 

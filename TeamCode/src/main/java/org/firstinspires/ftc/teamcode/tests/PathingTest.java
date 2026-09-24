@@ -7,8 +7,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Logger;
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineAutonomous;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Drive;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  */
 @Config
 @Autonomous
-public class PathingTest extends PeregrineAutonomous {
+public class PathingTest extends PeregrineOpMode {
 
     // Must match a target "name" in MANIFEST.JSON.
     public static String target = "score_left";
@@ -52,7 +52,7 @@ public class PathingTest extends PeregrineAutonomous {
     }
 
     @Override
-    public void finish() {
+    public void initStart() {
 
     }
 
@@ -68,6 +68,16 @@ public class PathingTest extends PeregrineAutonomous {
 
     @Override
     public void mainStart() {
+
+    }
+
+    @Override
+    public boolean mainLoop() {
+        return false;
+    }
+
+    @Override
+    public void end() {
 
     }
 }

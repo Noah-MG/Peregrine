@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.CompoundTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**
@@ -13,7 +14,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * so children must tolerate being run again after returning true.</p>
  */
 
-public class ParallelTask extends Task {
+public class ParallelTask extends CompoundTask {
 
     //One of the tasks to be run
     Task taskOne;
@@ -61,4 +62,8 @@ public class ParallelTask extends Task {
         return new ParallelTask(taskOne.reset(), taskTwo.reset());
     }
 
+    @Override
+    public boolean ends() {
+        return taskOne.ends() && taskTwo.ends();
+    }
 }

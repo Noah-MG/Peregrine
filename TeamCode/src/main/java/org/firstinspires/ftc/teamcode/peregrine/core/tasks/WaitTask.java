@@ -2,9 +2,11 @@ package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.peregrine.core.annotations.Ends;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
+@Ends
 public class WaitTask extends Task {
 
     long time;

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
+import org.firstinspires.ftc.teamcode.peregrine.core.annotations.Ends;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * <p>Used by the compound tasks (SeriesTask, ParallelTask, ParallelRaceTask) to fill an empty slot when
  * they are given fewer than two tasks.</p>
  */
+@Ends
 public class EmptyTask extends Task {
 
     public boolean run() {

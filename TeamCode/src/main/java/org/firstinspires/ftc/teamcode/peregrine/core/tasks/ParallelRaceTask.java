@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.CompoundTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**
@@ -13,7 +14,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * this task to do that.</p>
  */
 
-public class ParallelRaceTask extends Task {
+public class ParallelRaceTask extends CompoundTask {
 
     //One of the tasks to be run
     Task taskOne;
@@ -62,4 +63,8 @@ public class ParallelRaceTask extends Task {
         return new ParallelRaceTask(taskOne.reset(), taskTwo.reset());
     }
 
+    @Override
+    public boolean ends() {
+        return taskOne.ends() || taskTwo.ends();
+    }
 }

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
 
+import org.firstinspires.ftc.teamcode.peregrine.core.annotations.Ends;
+
 /**
  *  <h3>The class that represents any action the robot might take, no matter how complicated</h3>
  *
@@ -39,4 +41,12 @@ public abstract class Task {
      */
     public abstract Task reset();
 
+    /**
+     * Returns whether this task ends, evaluate the children of any subtasks if compound
+     *
+     * @return Whether this task ends
+     */
+    public boolean ends() {
+        return this.getClass().isAnnotationPresent(Ends.class);
+    }
 }

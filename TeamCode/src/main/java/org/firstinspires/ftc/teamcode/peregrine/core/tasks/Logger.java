@@ -132,7 +132,11 @@ public class Logger extends Task {
     // Starts a brand-new log file.
     @Override
     public Task reset() {
-        return new Logger(opMode);
+        Logger output = new Logger(opMode);
+        for (LogItem logItem : logItems) {
+            output.addLogItem(logItem.name, logItem.evaluator);
+        }
+        return output;
     }
 
     // Returns the app-specific directory on the first removable volume, or null (and clears sdInserted).

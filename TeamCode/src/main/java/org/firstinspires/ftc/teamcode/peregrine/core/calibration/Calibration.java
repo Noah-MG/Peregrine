@@ -3,9 +3,7 @@ package org.firstinspires.ftc.teamcode.peregrine.core.calibration;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Logger;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelRaceTask;
@@ -34,16 +32,7 @@ public class Calibration extends PeregrineOpMode {
     public Task defineTasks() {
         movement = new TeleopMovement(this);
         logger = new Logger(this);
-        logger.addLogItem("FR", () -> hardware.FR.getPower());
-        logger.addLogItem("FL", () -> hardware.FL.getPower());
-        logger.addLogItem("BR", () -> hardware.BR.getPower());
-        logger.addLogItem("BL", () -> hardware.BL.getPower());
-        logger.addLogItem("x",  () -> localizer.getPose().getX(DistanceUnit.CM));
-        logger.addLogItem("y",  () -> localizer.getPose().getY(DistanceUnit.CM));
-        logger.addLogItem("h",  () -> localizer.getPose().getHeading(AngleUnit.RADIANS));
-        logger.addLogItem("x_vel", () -> localizer.getVelX(DistanceUnit.CM));
-        logger.addLogItem("y_vel", () -> localizer.getVelY(DistanceUnit.CM));
-        logger.addLogItem("h_vel", () -> localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS));
+        logger.addDrivetrainItems();
 
         // Neither task ever returns true, so the race runs until the opMode is stopped.
         return new ParallelRaceTask(movement, logger);

@@ -5,6 +5,9 @@ import android.os.Environment;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
@@ -81,8 +84,8 @@ public class Logger extends Task {
             }
         }
 
-        // One new file per construction, e.g. calibration_log_20260910_153000.csv.
-        logFile = new File(logDir, "calibration_log_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date()) + ".csv");
+        // One new file per construction, e.g. log_20260910_153000.csv.
+        logFile = new File(logDir, "log_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date()) + ".csv");
 
         try {
             writer = new FileWriter(logFile, true);
@@ -137,6 +140,19 @@ public class Logger extends Task {
             output.addLogItem(logItem.name, logItem.evaluator);
         }
         return output;
+    }
+
+    public void addDrivetrainItems() {
+        addLogItem("FR", () -> opMode.hardware.FR.getPower());
+        addLogItem("FL", () -> opMode.hardware.FL.getPower());
+        addLogItem("BR", () -> opMode.hardware.BR.getPower());
+        addLogItem("BL", () -> opMode.hardware.BL.getPower());
+        addLogItem("x",  () -> opMode.localizer.getPose().getX(DistanceUnit.CM));
+        addLogItem("y",  () -> opMode.localizer.getPose().getY(DistanceUnit.CM));
+        addLogItem("h",  () -> opMode.localizer.getPose().getHeading(AngleUnit.RADIANS));
+        addLogItem("x_vel", () -> opMode.localizer.getVelX(DistanceUnit.CM));
+        addLogItem("y_vel", () -> opMode.localizer.getVelY(DistanceUnit.CM));
+        addLogItem("h_vel", () -> opMode.localizer.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS));
     }
 
     // Returns the app-specific directory on the first removable volume, or null (and clears sdInserted).

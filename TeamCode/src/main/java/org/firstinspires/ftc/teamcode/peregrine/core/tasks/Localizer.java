@@ -33,7 +33,6 @@ public class Localizer extends Task {
         this.startingPose = startingPose;
         // Loop counter, only shown on telemetry while waiting.
         int i = 0;
-        opMode.hardware.odo.resetPosAndIMU();
         while(opMode.hardware.odo.getDeviceStatus() != GoBildaPinpointDriver.DeviceStatus.READY) {
             opMode.hardware.odo.update();
             opMode.telem.addData("Odo Status", opMode.hardware.odo.getDeviceStatus());

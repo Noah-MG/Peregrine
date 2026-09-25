@@ -14,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -102,42 +101,31 @@ public class OptimalityEngine {
 
         sdCard = findSdCard();
         if(sdCard == null) {
-            opMode.telem.addLine("No SD Card found");
-            opMode.telem.update();
-            opMode.requestOpModeStop();
-            return;
+            throw new IllegalStateException("No SD Card found.");
         }
 
         // TABLE_FORMAT.MD §1: both JSON files sit at the root of the card.
         File manifestFile = new File(sdCard, "MANIFEST.JSON");
         File modelFile = new File(sdCard, "MODEL.JSON");
         if(!(manifestFile.exists() && modelFile.exists())) {
-            opMode.telem.addData("Tables not found on ", sdCard);
             if(!Environment.getExternalStorageState(sdCard).equals(Environment.MEDIA_MOUNTED)) {
-                opMode.telem.addLine("SD Card not mounted, did you format it to FAT32?");
+                throw new IllegalStateException("SD Card not mounted, did you format it to FAT32?");
+            } else {
+                throw new IllegalStateException("No tables found on SD Card");
             }
-            opMode.telem.update();
-            opMode.requestOpModeStop();
-            return;
         }
 
         try {
             manifest = mapper.readTree(manifestFile);
             model = mapper.readTree(modelFile);
-        } catch (Throwable t) {
-            opMode.telem.addData("Error", t);
-            opMode.telem.update();
-            opMode.requestOpModeStop();
-            return;
+        } catch (Exception e) {
+            throw new RuntimeException("Exception while reading JSONs from SD Card", e);
         }
 
         // TABLE_FORMAT.MD §3: all six axes, velocities included, must be field frame so odometry can be
         // fed in directly without rotation.
         if(!Objects.equals(manifest.get("grid").get("frame").asText(), "field")) {
-            opMode.telem.addLine("Please make sure that the SD card tables are generated in the field frame");
-            opMode.telem.update();
-            opMode.requestOpModeStop();
-            return;
+            throw new IllegalStateException("Tables must be generated in field frame");
         }
 
         targetNames = new String[manifest.get("targets").size()];
@@ -147,37 +135,22 @@ public class OptimalityEngine {
 
         // TABLE_FORMAT.MD §6: only these four storage types are defined.
         if(!Objects.equals(dtype, "u8") && !Objects.equals(dtype, "u16") && !Objects.equals(dtype, "f16")  && !Objects.equals(dtype, "f32")) {
-            opMode.telem.addLine("SD card table uses unsupported datatype \"" + dtype + "\", please create table using u8, u16, f16, or f32");
-            opMode.telem.update();
-            opMode.requestOpModeStop();
-            return;
+            throw new IllegalStateException("SD card uses unsupported datatype \"" + dtype + "\", use u8, u16, f16, or f32 instead");
         }
 
         // Cross-check elem_bytes against the dtype, per the table in TABLE_FORMAT.MD §6.
         switch (dtype) {
             case "u8" : if(manifest.get("encoding").get("elem_bytes").asInt() != 1) {
-                opMode.telem.addLine("SD card table data type u8 should be 1 byte, please reprocess table");
-                opMode.telem.update();
-                opMode.requestOpModeStop();
-                return;
+                throw new IllegalStateException("SD card table datatype u8 should be 1 byte");
             } break;
             case "u16" : if(manifest.get("encoding").get("elem_bytes").asInt() != 2) {
-                opMode.telem.addLine("SD card table data type u16 should be 2 bytes, please reprocess table");
-                opMode.telem.update();
-                opMode.requestOpModeStop();
-                return;
+                throw new IllegalStateException("SD card table datatype u16 should be 2 bytes");
             } break;
             case "f16" : if(manifest.get("encoding").get("elem_bytes").asInt() != 2) {
-                opMode.telem.addLine("SD card table data type f16 should be 2 byte, please reprocess table");
-                opMode.telem.update();
-                opMode.requestOpModeStop();
-                return;
+                throw new IllegalStateException("SD card table datatype f16 should be 2 bytes");
             } break;
             case "f32" : if(manifest.get("encoding").get("elem_bytes").asInt() != 4) {
-                opMode.telem.addLine("SD card table data type f32 should be 4 byte, please reprocess table");
-                opMode.telem.update();
-                opMode.requestOpModeStop();
-                return;
+                throw new IllegalStateException("SD card table datatype f32 should be 4 bytes");
             } break;
         }
 
@@ -199,10 +172,8 @@ public class OptimalityEngine {
                     // file_pattern is a printf pattern such as "TABLES/T00C%04d.BIN"; q is the chunk number (§5).
                     table[idx][q] = new RandomAccessFile(new File(sdCard, String.format(Locale.US, manifest.get("targets").get(p).get("file_pattern").asText(), q)), "r");
                 } catch (Exception e) {
-                    opMode.telem.addLine("Could not find table binary on SD card at " + manifest.get("targets").get(p).get("file_pattern").asText());
-                    opMode.telem.update();
-                    opMode.requestOpModeStop();
-                    return;
+                    throw new IllegalStateException("Could not find table binary on SD card at " +
+                            manifest.get("targets").get(p).get("file_pattern").asText(), e);
                 }
             }
         }
@@ -443,9 +414,7 @@ public class OptimalityEngine {
 
         // NOTE: this requests a stop but does not return, so a wrong-length state will still throw below.
         if(state.length != 6) {
-            opMode.telem.addLine("The state vector must be 6 values in length!");
-            opMode.telem.update();
-            opMode.requestOpModeStop();
+            throw new IllegalArgumentException("The state vector must be 6 values in length.");
         }
 
         // step[k] from TABLE_FORMAT.MD §3.
@@ -659,7 +628,7 @@ public class OptimalityEngine {
                     (bytes[0] & 0xFF);
         double raw = Float.intBitsToFloat(bits);
         if(!Double.isFinite(raw)) return Double.POSITIVE_INFINITY;
-        return raw < 0 ? 50000 + -raw : raw;
+        return raw < 0 ? 50000 - raw : raw;
     }
 
     /** Closes every open chunk file. Called by PeregrineOpMode when the opMode ends. Safe if the constructor bailed out early. */
@@ -689,7 +658,7 @@ public class OptimalityEngine {
                 if (Environment.isExternalStorageRemovable(dir)) return dir.getParentFile().getParentFile().getParentFile().getParentFile();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Unexpected error while finding SD Card", e);
         }
         return null;
     }

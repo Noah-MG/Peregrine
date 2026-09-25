@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
 
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.annotations.Ends;
 
 /**
  *  <h3>The class that represents any action the robot might take, no matter how complicated</h3>
@@ -29,10 +29,9 @@ public abstract class Task {
 
     /**
      * Puts the task into a safe end state if it must be ended early, for example at the end of a
-     * ParallelRaceTask
-     * @return Whether the task has finished ending.
+     * ParallelRaceTask. Gets called if the task is run for the last time and returns false.
      */
-    public abstract boolean end();
+    public abstract void end();
 
     /**
      * Returns a fresh copy of the task, resetting all changes.
@@ -41,4 +40,12 @@ public abstract class Task {
      */
     public abstract Task reset();
 
+    /**
+     * Returns whether this task ends, evaluate the children of any subtasks if compound
+     *
+     * @return Whether this task ends
+     */
+    public boolean ends() {
+        return this.getClass().isAnnotationPresent(Ends.class);
+    }
 }

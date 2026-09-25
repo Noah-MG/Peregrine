@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.CompoundTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**
@@ -11,7 +12,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * last) followed by the last task.</p>
  */
 
-public class SeriesTask extends Task {
+public class SeriesTask extends CompoundTask {
 
     //The first task to be run
     Task taskOne;
@@ -56,11 +57,12 @@ public class SeriesTask extends Task {
     }
 
     // Ends whichever child is currently active.
-    public boolean end(){
+    public void end(){
         if(!taskOneDone) {
-            return taskOne.end();
+            taskOne.end();
+            taskTwo.end();
         } else {
-            return taskTwo.end();
+            taskTwo.end();
         }
     }
 
@@ -68,4 +70,8 @@ public class SeriesTask extends Task {
         return new SeriesTask(taskOne.reset(), taskTwo.reset());
     }
 
+    @Override
+    public boolean ends() {
+        return taskOne.ends() && taskTwo.ends();
+    }
 }

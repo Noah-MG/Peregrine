@@ -4,7 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineTeleop;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Logger;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelRaceTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.TeleopMovement;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
@@ -22,18 +23,24 @@ import org.firstinspires.ftc.teamcode.peregrine.editables.RobotParams;
  * SD card has no MANIFEST.JSON / MODEL.JSON.</p>
  */
 @TeleOp
-public class Calibration extends PeregrineTeleop {
+public class Calibration extends PeregrineOpMode {
 
-    Task movement;
-    Task logger;
+    TeleopMovement movement;
+    Logger logger;
 
     @Override
     public Task defineTasks() {
         movement = new TeleopMovement(this);
-        logger = new CalibrationLogger(this);
+        logger = new Logger(this);
+        logger.addDrivetrainItems();
 
         // Neither task ever returns true, so the race runs until the opMode is stopped.
         return new ParallelRaceTask(movement, logger);
+    }
+
+    @Override
+    public void initStart() {
+
     }
 
     // Calibration only needs relative motion, so start at the origin.
@@ -53,7 +60,12 @@ public class Calibration extends PeregrineTeleop {
     }
 
     @Override
-    public void finish() {
+    public void mainLoop() {
+
+    }
+
+    @Override
+    public void end() {
 
     }
 }

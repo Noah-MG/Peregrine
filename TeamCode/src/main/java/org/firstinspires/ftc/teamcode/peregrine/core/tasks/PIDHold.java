@@ -6,7 +6,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.ejml.simple.SimpleMatrix;
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Kinematics;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
@@ -130,9 +130,8 @@ public class PIDHold extends Task {
     }
 
     @Override
-    public boolean end() {
+    public void end() {
         Kinematics.powerMotors(0, 0, 0, opMode);
-        return true;
     }
 
     @Override

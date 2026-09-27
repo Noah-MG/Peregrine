@@ -66,7 +66,7 @@ public class MyTeleop extends PeregrineTeleop {
 }
 ```
 
-{: .note }
+{: .noteSupplier }
 `TeleopMovement` currently sends the left stick's x axis to *forward* and its y axis to *strafe*.
 Expect that mapping to change.
 

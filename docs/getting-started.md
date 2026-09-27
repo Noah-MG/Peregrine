@@ -105,7 +105,7 @@ initialised.
 Insert the microSD card with your tables into the Control Hub. See [The SD card](sd-card.md) for what
 goes on it.
 
-{: .note }
+{: .noteSupplier }
 Right now even teleop opModes load the tables at init, so you need a card with `MANIFEST.JSON` and
 `MODEL.JSON` on it before *any* Peregrine opMode will run.
 

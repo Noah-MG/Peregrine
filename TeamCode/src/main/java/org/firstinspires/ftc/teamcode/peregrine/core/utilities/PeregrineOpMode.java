@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Localizer;
-import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelTask;
+import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelRaceTask;
 import org.firstinspires.ftc.teamcode.peregrine.editables.GlobalVariables;
 import org.firstinspires.ftc.teamcode.peregrine.editables.Hardware;
 
@@ -64,7 +64,7 @@ public abstract class PeregrineOpMode extends LinearOpMode {
         optimalityEngine = new OptimalityEngine(this);
         globalVariables = new GlobalVariables();
 
-        tree = new ParallelTask(localizer, defineTasks());
+        tree = new ParallelRaceTask(localizer, defineTasks());
         initStart();
 
         while(opModeInInit()) {

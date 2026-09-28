@@ -68,7 +68,11 @@ public class PIDHold extends Task {
     public PIDHold(PeregrineOpMode opMode, String target) {
         this.opMode = opMode;
         targetName = target;
-        this.target = opMode.optimalityEngine.targets.get(targetName);
+        try {
+            this.target = opMode.optimalityEngine.targets.get(targetName);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Invalid target name, no such target present on SD Card.");
+        }
         targetState = new SimpleMatrix(new double[][]{opMode.optimalityEngine.getTargetCoords(this.target)}).transpose();
 
         // Order is fixed by OptimalityEngine.getPIDConstants().

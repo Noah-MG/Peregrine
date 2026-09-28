@@ -58,7 +58,7 @@ public class Drive extends Task {
         try {
             this.target = opMode.optimalityEngine.targets.get(targetName);
         } catch (NullPointerException e) {
-            throw new NullPointerException("Invalid target name, no such target present on SD Card.");
+            throw new IllegalArgumentException("Invalid target name, no such target present on SD Card.");
         }
         targetState = opMode.optimalityEngine.getTargetCoords(this.target);
 

@@ -690,7 +690,7 @@ public class OptimalityEngine {
             }
             return output;
         }
-        throw new NullPointerException("No such target");
+        throw new IllegalArgumentException("Invalid target name, no such target present on SD Card.");
     }
 
     /**

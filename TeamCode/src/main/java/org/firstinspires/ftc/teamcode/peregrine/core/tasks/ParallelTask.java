@@ -49,8 +49,8 @@ public class ParallelTask extends CompoundTask {
 
     // Ticks both children every loop. Done only when both report done on the same tick.
     public boolean run() {
-        taskOneDone = taskOne.run();
-        taskTwoDone = taskTwo.run();
+        if(!taskOneDone) taskOneDone = taskOne.run();
+        if(!taskTwoDone) taskTwoDone = taskTwo.run();
         return taskOneDone && taskTwoDone;
     }
 

@@ -6,7 +6,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.ejml.simple.SimpleMatrix;
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Kinematics;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
@@ -68,7 +68,13 @@ public class PIDHold extends Task {
     public PIDHold(PeregrineOpMode opMode, String target) {
         this.opMode = opMode;
         targetName = target;
-        this.target = opMode.optimalityEngine.targets.get(targetName);
+        if (opMode.optimalityEngine == null)
+            throw new IllegalStateException("This opMode's buildOptimalityEngine() returns false, but PIDHold needs the OptimalityEngine.");
+        try {
+            this.target = opMode.optimalityEngine.targets.get(targetName);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Invalid target name, no such target present on SD Card.");
+        }
         targetState = new SimpleMatrix(new double[][]{opMode.optimalityEngine.getTargetCoords(this.target)}).transpose();
 
         // Order is fixed by OptimalityEngine.getPIDConstants().
@@ -130,9 +136,8 @@ public class PIDHold extends Task {
     }
 
     @Override
-    public boolean end() {
+    public void end() {
         Kinematics.powerMotors(0, 0, 0, opMode);
-        return true;
     }
 
     @Override

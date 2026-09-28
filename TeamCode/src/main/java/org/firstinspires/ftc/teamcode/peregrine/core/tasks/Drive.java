@@ -4,7 +4,8 @@ import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.annotations.Ends;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Kinematics;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
@@ -26,6 +27,7 @@ import java.util.Arrays;
  * <p>Only position and heading are checked; the target velocity is ignored.</p>
  */
 @Config
+@Ends
 public class Drive extends Task {
 
     String targetName;
@@ -53,7 +55,13 @@ public class Drive extends Task {
     public Drive(PeregrineOpMode opMode, String target) {
         this.opMode = opMode;
         targetName = target;
-        this.target = opMode.optimalityEngine.targets.get(targetName);
+        if (opMode.optimalityEngine == null)
+            throw new IllegalStateException("This opMode's buildOptimalityEngine() returns false, but Drive needs the OptimalityEngine.");
+        try {
+            this.target = opMode.optimalityEngine.targets.get(targetName);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Invalid target name, no such target present on SD Card.");
+        }
         targetState = opMode.optimalityEngine.getTargetCoords(this.target);
 
         pidHold = new PIDHold(opMode, target);
@@ -83,9 +91,8 @@ public class Drive extends Task {
     }
 
     @Override
-    public boolean end() {
+    public void end() {
         Kinematics.powerMotors(0, 0, 0, opMode);
-        return true;
     }
 
     @Override

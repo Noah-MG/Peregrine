@@ -1,12 +1,13 @@
-package org.firstinspires.ftc.teamcode.peregrine.core.opModes;
+package org.firstinspires.ftc.teamcode.peregrine.core.utilities;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.peregrine.core.tasks.Localizer;
-import org.firstinspires.ftc.teamcode.peregrine.core.utilities.OptimalityEngine;
+import org.firstinspires.ftc.teamcode.peregrine.core.tasks.ParallelRaceTask;
 import org.firstinspires.ftc.teamcode.peregrine.editables.GlobalVariables;
 import org.firstinspires.ftc.teamcode.peregrine.editables.Hardware;
 
@@ -44,6 +45,8 @@ public abstract class PeregrineOpMode extends LinearOpMode {
      */
     public OptimalityEngine optimalityEngine;
 
+    Task tree;
+
     /**
      * This function should return the pose of the robot when init is pressed
      * @return The pose of the robot when init is pressed
@@ -54,17 +57,19 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     public void runOpMode() {
 
         // Construction order matters: Localizer needs hardware and telem, and OptimalityEngine needs telem.
-        telem = FtcDashboard.getInstance().getTelemetry();
+        telem = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         hardware = new Hardware(this);
         // Blocks until the Pinpoint reports READY, then sets its pose to startingPose().
         localizer = new Localizer(this, startingPose());
-        optimalityEngine = new OptimalityEngine(this);
         globalVariables = new GlobalVariables();
+        if(buildOptimalityEngine()) optimalityEngine = new OptimalityEngine(this);
 
+        tree = new ParallelRaceTask(localizer, defineTasks());
         initStart();
 
         while(opModeInInit()) {
             initLoop();
+            telem.update();
         }
 
         waitForStart();
@@ -73,15 +78,19 @@ public abstract class PeregrineOpMode extends LinearOpMode {
 
         // Tick the task tree until it reports done (mainLoop() returns true) or the opMode is stopped.
         // telem goes to FTC Dashboard and telemetry goes to the Driver Station.
-        while(opModeIsActive() && !mainLoop()) {
+        while(opModeIsActive() && !tree.run()) {
+            mainLoop();
             telem.update();
-            telemetry.update();
+            if(!opModeIsActive()) {
+                tree.end();
+            }
         }
 
-        optimalityEngine.closeReaders();
+        if(optimalityEngine != null) optimalityEngine.closeReaders();
         end();
-
     }
+
+    public abstract Task defineTasks();
 
     /**Is run once at the start of init.*/
     public abstract void initStart();
@@ -93,9 +102,11 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     public abstract void mainStart();
 
     /**Is run repeatedly after the start button is pressed, it is where the main body of code is run.*/
-    public abstract boolean mainLoop();
+    public abstract void mainLoop();
 
     /**Is run once at the end of the opMode.*/
     public abstract void end();
+
+    protected boolean buildOptimalityEngine() { return true; }
 
 }

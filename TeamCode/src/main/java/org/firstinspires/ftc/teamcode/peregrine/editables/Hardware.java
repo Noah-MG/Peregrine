@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.peregrine.editables;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 
 /**
  * <h3>All robot hardware, mapped once per opMode.</h3>
@@ -29,20 +29,25 @@ public class Hardware {
         odo.setOffsets(RobotParams.odoXOffset, RobotParams.odoYOffset, RobotParams.distanceUnit);
         odo.setEncoderResolution(RobotParams.podType);
         odo.setEncoderDirections(RobotParams.xEncoderDirection, RobotParams.yEncoderDirection);
+        odo.resetPosAndIMU();
 
         // Open-loop power control: the drivetrain model was fitted against raw power, not encoder velocity.
         FR = opMode.hardwareMap.get(DcMotor.class, "FR");
         FR.setDirection(RobotParams.FRDirection);
         FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FL = opMode.hardwareMap.get(DcMotor.class, "FL");
         FL.setDirection(RobotParams.FLDirection);
         FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BR = opMode.hardwareMap.get(DcMotor.class, "BR");
         BR.setDirection(RobotParams.BRDirection);
         BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BL = opMode.hardwareMap.get(DcMotor.class, "BL");
         BL.setDirection(RobotParams.BLDirection);
         BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
 }

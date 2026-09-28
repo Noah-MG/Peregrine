@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.CompoundTask;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**
@@ -13,7 +14,7 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * this task to do that.</p>
  */
 
-public class ParallelRaceTask extends Task {
+public class ParallelRaceTask extends CompoundTask {
 
     //One of the tasks to be run
     Task taskOne;
@@ -39,7 +40,7 @@ public class ParallelRaceTask extends Task {
             taskTwo = tasks[1];
         } else if (tasks.length == 1) {
             // NOTE: EmptyTask finishes immediately, so a single-task race ends after one tick.
-            taskOne = new EmptyTask();
+            taskOne = new WaitUntilTask(() -> false);
             taskTwo = tasks[0];
         } else {
             taskOne = new EmptyTask();
@@ -51,15 +52,26 @@ public class ParallelRaceTask extends Task {
     public boolean run() {
         taskOneDone = taskOne.run();
         taskTwoDone = taskTwo.run();
-        return taskOneDone || taskTwoDone;
+        if(taskOneDone || taskTwoDone) {
+            if (!taskOneDone) taskOne.end();
+            if (!taskTwoDone) taskTwo.end();
+            return true;
+        }
+        return false;
     }
 
-    public boolean end() {
-        return taskOne.end() && taskTwo.end();
+    public void end() {
+        if (taskOneDone || taskTwoDone) return;
+        taskOne.end();
+        taskTwo.end();
     }
 
     public Task reset() {
         return new ParallelRaceTask(taskOne.reset(), taskTwo.reset());
     }
 
+    @Override
+    public boolean ends() {
+        return taskOne.ends() || taskTwo.ends();
+    }
 }

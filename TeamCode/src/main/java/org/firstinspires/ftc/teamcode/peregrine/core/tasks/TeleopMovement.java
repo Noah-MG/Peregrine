@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.peregrine.core.tasks;
 
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Kinematics;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
@@ -25,8 +25,8 @@ public class TeleopMovement extends Task {
 
     // NOTE: does not stop the motors.
     @Override
-    public boolean end() {
-        return false;
+    public void end() {
+        Kinematics.powerMotors(0, 0, 0, opMode);
     }
 
     @Override

@@ -6,7 +6,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
-import org.firstinspires.ftc.teamcode.peregrine.core.opModes.PeregrineOpMode;
+import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
 import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 
 /**
@@ -33,7 +33,6 @@ public class Localizer extends Task {
         this.startingPose = startingPose;
         // Loop counter, only shown on telemetry while waiting.
         int i = 0;
-        opMode.hardware.odo.resetPosAndIMU();
         while(opMode.hardware.odo.getDeviceStatus() != GoBildaPinpointDriver.DeviceStatus.READY) {
             opMode.hardware.odo.update();
             opMode.telem.addData("Odo Status", opMode.hardware.odo.getDeviceStatus());
@@ -88,9 +87,7 @@ public class Localizer extends Task {
     }
 
     @Override
-    public boolean end() {
-        return false;
-    }
+    public void end() {}
 
     // NOTE: constructing a new Localizer resets the Pinpoint and puts the pose back at startingPose.
     @Override

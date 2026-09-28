@@ -1,6 +1,6 @@
 ---
 title: Calibration
-nav_order: 7
+nav_order: 8
 ---
 
 # Calibration
@@ -16,14 +16,9 @@ by driving the robot around while it logs everything, then fitting the log on th
 
 - Set up and check `RobotParams` first, **especially the odometry offsets**. See
   [Getting started](getting-started.md#robotparams).
-- Insert an SD card.
+- Insert an SD card. Calibration only writes logs to it, so it doesn't need any tables yet.
 - Calibrate on the **surface you'll compete on**. Grip varies a lot between floors, and a model fitted
   on a slippery practice floor makes the robot look weaker than it is.
-
-{: .warning }
-The Calibration opMode currently also loads the pathing tables at init, so it stops if the card has
-no `MANIFEST.JSON` and `MODEL.JSON`. Until that's fixed, put any valid set of tables on the card,
-for example from an earlier solve, before calibrating.
 
 ## Running it
 
@@ -37,7 +32,7 @@ for example from an earlier solve, before calibrating.
    | Left stick | Translate (forward/back and strafe) |
    | Right stick, x axis | Turn |
 
-   Stick input is squared (keeping its sign) for finer control near centre.
+   Stick input is cubed (keeping its sign) for finer control near centre.
 4. Press STOP when you're done. Each run writes a new log file.
 
 ## How to drive
@@ -58,7 +53,7 @@ A few minutes of varied driving is a good start.
 On the SD card:
 
 ```
-/Android/data/com.qualcomm.ftcrobotcontroller/files/logs/calibration_log_YYYYMMDD_HHMMSS.csv
+/Android/data/com.qualcomm.ftcrobotcontroller/files/logs/log_YYYYMMDD_HHMMSS.csv
 ```
 
 To get them off, power down and read the card on a computer, or use `adb`:

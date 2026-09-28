@@ -9,15 +9,20 @@ public final class Kinematics {
      * Sets the drive motor powers for a body-frame command. This is the same {@code [fwd, strafe, turn]}
      * command space that MODEL.JSON's "control" block uses (TABLE_FORMAT.MD §8.1).
      *
+     * <p>If any wheel would get more than full power, all four are scaled down together so the robot
+     * still moves in the requested direction. Only {@code MECANUM} is implemented; for any other
+     * {@link RobotParams#chassis} this does nothing.</p>
+     *
      * @param y forward command, -1..1
      * @param x strafe command, -1..1
      * @param h turn command, -1..1
+     * @param opMode the running opMode, whose {@code hardware} holds the drive motors
      */
     public static void powerMotors(double y, double x, double h, PeregrineOpMode opMode) {
         switch(RobotParams.chassis) {
             case MECANUM:
 
-                // Combine the joystick requests for each axis-motion to determine each wheel's power.
+                // Combine the forward, strafe and turn commands to determine each wheel's power.
                 double fr = y - x + h;
                 double fl = y + x - h;
                 double br = y + x + h;

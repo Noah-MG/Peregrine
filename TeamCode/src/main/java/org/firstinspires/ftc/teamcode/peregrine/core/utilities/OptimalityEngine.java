@@ -89,8 +89,13 @@ public class OptimalityEngine {
 
     /**
      * Locates the SD card, parses MANIFEST.JSON and MODEL.JSON, validates the encoding, and opens
-     * every chunk file of every target. On any failure it writes a telemetry message, requests the
-     * opMode to stop, and returns early, leaving the remaining fields null.
+     * every chunk file of every target. Built by PeregrineOpMode at INIT when
+     * buildOptimalityEngine() returns true.
+     *
+     * @throws IllegalStateException if the card is missing or unmounted, the tables are missing, not in
+     * the field frame, use an unsupported encoding, or a chunk file can't be opened. The message says
+     * which, and the opMode stops at INIT.
+     * @throws RuntimeException if the SD card can't be searched or a JSON file can't be parsed.
      */
     public OptimalityEngine(PeregrineOpMode opMode) {
         this.opMode = opMode;
@@ -203,6 +208,9 @@ public class OptimalityEngine {
      * {@code lambda . a}, where {@code lambda = -dV/dv} is the direction in velocity space that lowers
      * time-to-go fastest. With {@code a = A_u * (g(u) * u)} that becomes maximising {@code c . (g(u) * u)}
      * with {@code c = A_u^T * lambda}.</p>
+     *
+     * <p>Call it once per loop. Every call also pushes its result into the smoothing history used by
+     * {@link #boxcar(double[])}, whose length is read from {@link #window} on the first call.</p>
      *
      * @param target the target index (see {@link #targets})
      * @return {@code [fwd, strafe, turn]}, L1-normalised to 1 (full power), or all zeros if the gradient
@@ -412,7 +420,6 @@ public class OptimalityEngine {
      */
      double[] getGradient(int target, double[] state) {
 
-        // NOTE: this requests a stop but does not return, so a wrong-length state will still throw below.
         if(state.length != 6) {
             throw new IllegalArgumentException("The state vector must be 6 values in length.");
         }
@@ -631,7 +638,7 @@ public class OptimalityEngine {
         return raw < 0 ? 50000 - raw : raw;
     }
 
-    /** Closes every open chunk file. Called by PeregrineOpMode when the opMode ends. Safe if the constructor bailed out early. */
+    /** Closes every open chunk file. Called by PeregrineOpMode when the opMode ends. Safe to call even if some files were never opened. */
     public void closeReaders() {
         if (table == null) return;
         for (RandomAccessFile[] chunks : table) {
@@ -680,7 +687,11 @@ public class OptimalityEngine {
         return ((a % b) + b) % b;
     }
 
-    /** Returns the 6D goal state [x, y, h, vx, vy, w] of the target with the given index, read from the manifest. */
+    /**
+     * Returns the 6D goal state [x, y, h, vx, vy, w] of the target with the given index, read from the manifest.
+     *
+     * @throws IllegalArgumentException if no target has that index.
+     */
     public double[] getTargetCoords(int target) {
         double[] output = new double[]{0, 0, 0, 0, 0, 0};
         for (int i = 0; i < manifest.get("targets").size(); i++) {

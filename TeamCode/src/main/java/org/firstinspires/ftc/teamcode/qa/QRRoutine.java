@@ -10,12 +10,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * <h3>An opMode that runs a list of QA tests and logs the results.</h3>
+ *
+ * <p>Extend it, add {@code @TeleOp}, and implement {@link #tests()} and
+ * {@link #cleanupHardware(QAContext, boolean)}. Before pressing INIT, set QAConfig.tester and
+ * QAConfig.logName in FTC Dashboard; the routine refuses to start with the default log name.</p>
+ *
+ * <p>After START, each test runs in order until it finishes, times out (FAIL), throws, or the opMode
+ * is stopped. Every test gets a fresh QAContext, so hardware is rebuilt for each test that uses it. Results are
+ * written to the QALogger file as they happen, and a summary of the tests that didn't pass is shown
+ * on telemetry at the end. The opMode then waits for STOP.</p>
+ */
 public abstract class QRRoutine extends LinearOpMode {
 
+    // Driver Station + FTC Dashboard telemetry, shared with every QAContext.
     Telemetry telem;
     List<QATest> tests;
     QALogger logger;
 
+    // Summary counts shown at the end.
     int passCount;
     int totalCount;
     List<QATest> notPassed;
@@ -33,6 +47,7 @@ public abstract class QRRoutine extends LinearOpMode {
 
         waitForStart();
 
+        // Run each test until it finishes, times out or throws; then clean up and log it.
         for(QATest test : tests) {
             if (!opModeIsActive()) break;
             String err = "";
@@ -58,6 +73,7 @@ public abstract class QRRoutine extends LinearOpMode {
             } finally {
                 try { ctx.close(); } catch (Throwable ignored) {}
             }
+            // Still running here means the opMode was stopped mid-test.
             if (test.status == QATest.Status.RUNNING) {
                 test.status = QATest.Status.SKIP;
                 err = "STOPPED";
@@ -67,6 +83,7 @@ public abstract class QRRoutine extends LinearOpMode {
             if (!Objects.equals(err, "")) logger.writeToLog(test, err); else logger.writeToLog(test);
         }
 
+        // Summary: how many passed, and the name, status and note of every test that didn't.
         telem.addLine("QR ROUTINE COMPLETE");
         telem.addLine(passCount + "/" + totalCount + " tests passed");
         telem.addLine("Didn't pass:");
@@ -85,7 +102,18 @@ public abstract class QRRoutine extends LinearOpMode {
         logger.close();
     }
 
+    /**
+     * Builds the tests to run, in order. Called once during INIT.
+     * @return the tests, run first to last
+     */
     public abstract List<QATest> tests();
 
+    /**
+     * Puts the robot in a safe state after each test, for example by turning every motor off. Called
+     * after the test's own cleanup, however the test finished.
+     *
+     * @param ctx the finished test's context
+     * @param hardwareBuilt whether the test built the hardware; if false, don't call ctx.hardware()
+     */
     public abstract void cleanupHardware(QAContext ctx, boolean hardwareBuilt);
 }

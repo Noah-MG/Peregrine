@@ -9,9 +9,10 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * inputs will be played simultaneously. The task will have completed once all of its components
  * have completed.</p>
  *
+ * <p>Once a child finishes it is not run again, while the others carry on.</p>
+ *
  * <p>Internally it is a binary tree: more than two tasks become a nested ParallelTask plus the last
- * task. A child that has already finished keeps having run() called every loop until both are done,
- * so children must tolerate being run again after returning true.</p>
+ * task.</p>
  */
 
 public class ParallelTask extends CompoundTask {
@@ -47,13 +48,14 @@ public class ParallelTask extends CompoundTask {
         }
     }
 
-    // Ticks both children every loop. Done only when both report done on the same tick.
+    // Ticks each unfinished child every loop. Done once both have finished.
     public boolean run() {
         if(!taskOneDone) taskOneDone = taskOne.run();
         if(!taskTwoDone) taskTwoDone = taskTwo.run();
         return taskOneDone && taskTwoDone;
     }
 
+    // Ends whichever children haven't finished yet.
     public void end() {
         if (!taskOneDone) taskOne.end();
         if (!taskTwoDone) taskTwo.end();
@@ -63,6 +65,7 @@ public class ParallelTask extends CompoundTask {
         return new ParallelTask(taskOne.reset(), taskTwo.reset());
     }
 
+    // Ends only if both children are guaranteed to.
     @Override
     public boolean ends() {
         return taskOne.ends() && taskTwo.ends();

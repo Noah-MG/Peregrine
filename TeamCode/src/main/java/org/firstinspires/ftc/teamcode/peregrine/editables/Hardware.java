@@ -9,7 +9,8 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.PeregrineOpMode;
  * <h3>All robot hardware, mapped once per opMode.</h3>
  *
  * <p>The names ("odo", "FR", "FL", "BR", "BL") must match the Driver Station robot configuration.
- * Add your own mechanisms here. Tuning values live in RobotParams.</p>
+ * Add your own mechanisms here: declare a public field, then map it in the constructor. Tasks reach
+ * them as {@code opMode.hardware.<name>}. Tuning values live in RobotParams.</p>
  */
 public class Hardware {
 
@@ -22,6 +23,10 @@ public class Hardware {
     public DcMotor BR;
     public DcMotor BL;
 
+    /**
+     * Maps and configures every device using the opMode's hardwareMap and the values in RobotParams.
+     * PeregrineOpMode calls this once at INIT. It also resets the Pinpoint's position and IMU.
+     */
     public Hardware(PeregrineOpMode opMode) {
         odo = opMode.hardwareMap.get(GoBildaPinpointDriver.class, "odo");
         // Pod positions relative to the robot's tracking centre. The drivetrain fit is sensitive to this

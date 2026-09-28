@@ -50,7 +50,13 @@ public class Drive extends Task {
     Task pidHold;
 
     /**
+     * Looks the target up in the OptimalityEngine. This runs when the task is built, which is usually
+     * during INIT, so a bad target name stops the opMode before the match starts.
+     *
+     * @param opMode the running opMode; its buildOptimalityEngine() must return true.
      * @param target the target's name as written in MANIFEST.JSON, e.g. "score_left".
+     * @throws IllegalStateException if the opMode didn't build an OptimalityEngine.
+     * @throws IllegalArgumentException if no target with that name is on the SD card.
      */
     public Drive(PeregrineOpMode opMode, String target) {
         this.opMode = opMode;
@@ -67,6 +73,7 @@ public class Drive extends Task {
         pidHold = new PIDHold(opMode, target);
     }
 
+    /** @return true once the robot is within {@link #DoneDist} and {@link #DoneAng} of the target, with the motors stopped. */
     @Override
     public boolean run() {
         // Solved every loop, even in the honing/done phases. This also keeps the boxcar history current.
@@ -90,6 +97,7 @@ public class Drive extends Task {
         return false;
     }
 
+    /** Stops the drive motors. */
     @Override
     public void end() {
         Kinematics.powerMotors(0, 0, 0, opMode);

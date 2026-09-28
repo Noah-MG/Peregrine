@@ -1,6 +1,6 @@
 ---
 title: Driving to targets
-nav_order: 5
+nav_order: 6
 ---
 
 # Driving to targets
@@ -32,8 +32,10 @@ wherever it ended up. Walls and obstacles are already accounted for in the table
 new Drive(this, "score_left")
 ```
 
-The name has to match a target `name` in the card's `MANIFEST.JSON` exactly. An unknown name crashes
-at init.
+The name has to match a target `name` in the card's `MANIFEST.JSON` exactly. An unknown name stops
+the opMode at INIT with `Invalid target name, no such target present on SD Card.` The opMode must also
+load the tables, so don't [opt out](opmodes.md#opting-out-of-the-sd-card-tables) of them in an opMode
+that uses `Drive`.
 
 `Drive` works in three phases:
 
@@ -75,13 +77,34 @@ target.
 
 ## Trying it out
 
-`tests/PathingTest.java` is a ready-made autonomous that drives to one target while logging the run to
-the SD card. The target name and starting pose (`target`, `x0`, `y0`, `h0`) are editable from FTC
-Dashboard.
+A small autonomous that drives to one target while logging the run to the SD card, so you can look
+at the path afterwards:
 
-{: .noteSupplier }
-`PathingTest`'s default starting pose, (1, 1) cm, is outside the table area, so change it before you
-run.
+```java
+@Autonomous
+public class PathingTest extends PeregrineOpMode {
+
+    @Override
+    public Pose2D startingPose() {
+        // Must be inside the table area, in the field frame.
+        return new Pose2D(DistanceUnit.CM, 60, 60, AngleUnit.RADIANS, 0);
+    }
+
+    @Override
+    public Task defineTasks() {
+        Logger logger = new Logger(this);
+        logger.addDrivetrainItems();
+        // The logger never finishes, so the race ends when Drive arrives.
+        return new ParallelRaceTask(new Drive(this, "score_left"), logger);
+    }
+
+    @Override public void initStart() {}
+    @Override public void initLoop() {}
+    @Override public void mainStart() {}
+    @Override public void mainLoop() {}
+    @Override public void end() {}
+}
+```
 
 ## Changing targets or the field
 

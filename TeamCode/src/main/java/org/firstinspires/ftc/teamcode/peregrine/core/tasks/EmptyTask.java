@@ -6,8 +6,9 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 /**
  * <h3>A task that does nothing and is immediately finished.</h3>
  *
- * <p>Used by the compound tasks (SeriesTask, ParallelTask, ParallelRaceTask) to fill an empty slot when
- * they are given fewer than two tasks.</p>
+ * <p>Used by SeriesTask and ParallelTask to fill an empty slot when they are given fewer than two
+ * tasks, and by ParallelRaceTask when it is given none. It is also a handy placeholder while you are
+ * still writing a routine.</p>
  */
 @Ends
 public class EmptyTask extends Task {

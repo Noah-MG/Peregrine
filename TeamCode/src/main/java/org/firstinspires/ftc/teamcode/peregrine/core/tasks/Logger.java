@@ -21,16 +21,23 @@ import java.util.Locale;
 import java.util.function.DoubleSupplier;
 
 /**
- * <h3>Logs motor powers and odometry state to a timestamped CSV on the SD card, once per loop.</h3>
+ * <h3>Logs any values you choose to a timestamped CSV on the SD card, once per loop.</h3>
  *
- * <p>Columns: {@code timestamp (ms since construction), FR, FL, BR, BL (motor powers), x, y (cm),
- * h (rad), x_vel, y_vel (cm/s), h_vel (rad/s)}. Pose and velocities are field frame, as reported by
- * the Pinpoint. These logs are the input to the desktop drivetrain fit (TABLE_FORMAT.MD §8.6).</p>
+ * <p>Each Logger writes a new file,
+ * {@code /Android/data/com.qualcomm.ftcrobotcontroller/files/logs/log_yyyyMMdd_HHmmss.csv} on the card.
+ * The first column is always {@code timestamp} (ms since the Logger was built). Add more columns with
+ * {@link #addLogItem(String, DoubleSupplier)} before the Logger first runs, for example
+ * {@code logger.addLogItem("lift", () -> hardware.lift.getCurrentPosition())}.</p>
  *
- * <p>Never finishes on its own: run() always returns false.</p>
+ * <p>{@link #addDrivetrainItems()} adds the columns the desktop drivetrain fit reads
+ * (TABLE_FORMAT.MD §8.6), which is what Calibration uses.</p>
+ *
+ * <p>Never finishes on its own: run() always returns false. Run it in a ParallelTask or
+ * ParallelRaceTask alongside the tasks you want to record.</p>
  */
 public class Logger extends Task {
 
+    // One CSV column: its header name and the function that reads its value each loop.
     static class LogItem {
         String name;
         DoubleSupplier evaluator;
@@ -46,11 +53,12 @@ public class Logger extends Task {
     }
 
     ArrayList<LogItem> logItems;
+    // Set on the first run(). After that, columns can no longer be added.
     boolean hasRun;
 
     PeregrineOpMode opMode;
 
-    // Cleared when the card is missing or a write fails.
+    // Cleared when no card is found or the logs directory can't be created.
     boolean sdInserted = true;
     // NOTE: unlike OptimalityEngine.findSdCard(), this is the app-specific directory on the card
     // (/storage/XXXX-XXXX/Android/data/<package>/files), not the card root, so logs land in <that>/logs.
@@ -61,20 +69,28 @@ public class Logger extends Task {
     // Measures the timestamp column.
     ElapsedTime time;
 
+    /**
+     * Finds the SD card and creates a new log file with just the {@code timestamp} header.
+     *
+     * @param opMode the running opMode
+     * @throws IllegalStateException if there is no SD card, it isn't mounted, or the logs directory
+     * can't be created.
+     * @throws RuntimeException if the log file can't be written.
+     */
     public Logger(PeregrineOpMode opMode) {
         this.opMode = opMode;
         logItems = new ArrayList<>();
         hasRun = false;
 
         sdCard = findSdCard();
-        // Error code "1": no removable storage found.
+        // No removable storage found.
         if(!sdInserted || sdCard == null) {
             throw new IllegalStateException("No removable storage found.");
         }
 
         File logDir = new File(sdCard, "logs");
         if(!logDir.exists()) {
-            // Error code "2": the logs directory could not be created (usually the card is not mounted).
+            // The logs directory could not be created, usually because the card is not mounted.
             if(!logDir.mkdirs()) {
                 sdInserted = false;
                 if (!Environment.getExternalStorageState(sdCard).equals(Environment.MEDIA_MOUNTED)) {
@@ -99,6 +115,14 @@ public class Logger extends Task {
         time = new ElapsedTime();
     }
 
+    /**
+     * Adds a column to the log. Must be called before the Logger's first run().
+     *
+     * @param name the column header
+     * @param value read once per loop to fill the column, usually a lambda such as
+     *              {@code () -> hardware.lift.getCurrentPosition()}
+     * @throws IllegalStateException if the Logger has already run.
+     */
     public void addLogItem(String name, DoubleSupplier value) {
         if(hasRun) throw new IllegalStateException("New log items can only be added before logger is run");
         logItems.add(new LogItem(name, value));
@@ -111,7 +135,7 @@ public class Logger extends Task {
         }
     }
 
-    /** Appends one CSV row with the current motor powers and odometry state. It flushes every row, so a crash loses at most one line. */
+    /** Appends one CSV row with the timestamp and the current value of every column. It flushes every row, so a crash loses at most one line. */
     @Override
     public boolean run() {
         hasRun = true;
@@ -132,7 +156,7 @@ public class Logger extends Task {
     @Override
     public void end() {}
 
-    // Starts a brand-new log file.
+    // Starts a brand-new log file with the same columns.
     @Override
     public Task reset() {
         Logger output = new Logger(opMode);
@@ -142,6 +166,11 @@ public class Logger extends Task {
         return output;
     }
 
+    /**
+     * Adds the columns the desktop drivetrain fitter expects: {@code FR, FL, BR, BL} (motor powers),
+     * {@code x, y} (cm), {@code h} (rad), {@code x_vel, y_vel} (cm/s) and {@code h_vel} (rad/s). Pose
+     * and velocities are field frame, as reported by the Pinpoint.
+     */
     public void addDrivetrainItems() {
         addLogItem("FR", () -> opMode.hardware.FR.getPower());
         addLogItem("FL", () -> opMode.hardware.FL.getPower());

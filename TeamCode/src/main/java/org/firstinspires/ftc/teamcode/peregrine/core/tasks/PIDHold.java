@@ -63,7 +63,10 @@ public class PIDHold extends Task {
     ElapsedTime dt;
 
     /**
+     * @param opMode the running opMode; its buildOptimalityEngine() must return true.
      * @param target the target's name as written in MANIFEST.JSON.
+     * @throws IllegalStateException if the opMode didn't build an OptimalityEngine.
+     * @throws IllegalArgumentException if no target with that name is on the SD card.
      */
     public PIDHold(PeregrineOpMode opMode, String target) {
         this.opMode = opMode;

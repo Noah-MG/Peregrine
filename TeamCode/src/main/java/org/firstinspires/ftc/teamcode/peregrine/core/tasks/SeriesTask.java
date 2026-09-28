@@ -69,6 +69,7 @@ public class SeriesTask extends CompoundTask {
         return new SeriesTask(taskOne.reset(), taskTwo.reset());
     }
 
+    // Ends only if both children are guaranteed to.
     @Override
     public boolean ends() {
         return taskOne.ends() && taskTwo.ends();

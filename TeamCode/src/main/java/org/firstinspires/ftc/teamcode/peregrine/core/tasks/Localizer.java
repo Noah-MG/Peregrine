@@ -12,9 +12,9 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
 /**
  * <h3>Wraps the goBILDA Pinpoint odometry computer.</h3>
  *
- * <p>Runs as a never-ending task alongside every opMode's task tree, see PeregrineAutonomous and
- * PeregrineTeleop. run() pulls a fresh reading from the Pinpoint each loop, and the getters return
- * that cached reading.</p>
+ * <p>Runs as a never-ending task, raced against every opMode's task tree, see
+ * PeregrineOpMode.runOpMode(). run() pulls a fresh reading from the Pinpoint each loop, and the getters
+ * return that cached reading. Tasks reach it as {@code opMode.localizer}.</p>
  *
  * <p>All values are field frame, which is what the value tables expect (TABLE_FORMAT.MD §3). The
  * drivetrain model and PID are body frame, so their callers rotate by -h themselves.</p>
@@ -24,9 +24,12 @@ public class Localizer extends Task {
     Pose2D startingPose;
 
     /**
-     * Resets the Pinpoint and its IMU, blocks until it reports READY, then sets its pose to
-     * startingPose. Runs during init. Nothing checks for a stop request, so if the Pinpoint never
-     * becomes READY this loop hangs.
+     * Blocks until the Pinpoint (which Hardware reset when it was built) reports READY, then sets its
+     * pose to startingPose. Runs during init. Nothing checks for a stop request, so if the Pinpoint
+     * never becomes READY this loop hangs.
+     *
+     * @param opMode the running opMode; its hardware and telem must already be built
+     * @param startingPose where the robot is, in the field frame
      */
     public Localizer (PeregrineOpMode opMode, Pose2D startingPose) {
         this.opMode = opMode;
@@ -48,17 +51,17 @@ public class Localizer extends Task {
         return opMode.hardware.odo.getPosition();
     }
 
-    /** Field-frame x velocity. */
+    /** Field-frame x velocity, in distanceUnit per second. */
     public double getVelX(DistanceUnit distanceUnit) {
         return opMode.hardware.odo.getVelX(distanceUnit);
     }
 
-    /** Field-frame y velocity. */
+    /** Field-frame y velocity, in distanceUnit per second. */
     public double getVelY(DistanceUnit distanceUnit) {
         return opMode.hardware.odo.getVelY(distanceUnit);
     }
 
-    /** Angular velocity. It is the same in the field and body frames. */
+    /** Angular velocity, in angleUnit per second. It is the same in the field and body frames. */
     public double getHeadingVelocity(UnnormalizedAngleUnit angleUnit) {
         return opMode.hardware.odo.getHeadingVelocity(angleUnit);
     }
@@ -89,7 +92,7 @@ public class Localizer extends Task {
     @Override
     public void end() {}
 
-    // NOTE: constructing a new Localizer resets the Pinpoint and puts the pose back at startingPose.
+    // NOTE: constructing a new Localizer puts the Pinpoint's pose back at startingPose.
     @Override
     public Task reset() {
         return new Localizer(opMode, startingPose);

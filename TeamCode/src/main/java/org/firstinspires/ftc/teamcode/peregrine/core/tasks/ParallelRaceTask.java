@@ -9,9 +9,12 @@ import org.firstinspires.ftc.teamcode.peregrine.core.utilities.Task;
  * inputs will be played simultaneously. The task will have completed once one of its components
  * has completed.</p>
  *
+ * <p>When the race finishes, every task that hasn't finished yet (the "losers") has end() called on
+ * it, so it can stop its motors. A race is a good way to give a task a time limit, for example
+ * {@code new ParallelRaceTask(new Drive(this, "park"), new WaitTask(this, 3000))}.</p>
+ *
  * <p>Internally it is a binary tree: more than two tasks become a nested ParallelRaceTask plus the
- * last task. The "losing" tasks are not ended automatically when the race finishes. Call end() on
- * this task to do that.</p>
+ * last task.</p>
  */
 
 public class ParallelRaceTask extends CompoundTask {
@@ -39,7 +42,7 @@ public class ParallelRaceTask extends CompoundTask {
             taskOne = tasks[0];
             taskTwo = tasks[1];
         } else if (tasks.length == 1) {
-            // NOTE: EmptyTask finishes immediately, so a single-task race ends after one tick.
+            // Paired with a task that never finishes, so a single-task race finishes when that task does.
             taskOne = new WaitUntilTask(() -> false);
             taskTwo = tasks[0];
         } else {
@@ -48,7 +51,7 @@ public class ParallelRaceTask extends CompoundTask {
         }
     }
 
-    // Ticks both children every loop and finishes as soon as either one reports done.
+    // Ticks both children every loop and finishes as soon as either one reports done, ending the other.
     public boolean run() {
         taskOneDone = taskOne.run();
         taskTwoDone = taskTwo.run();
@@ -60,6 +63,7 @@ public class ParallelRaceTask extends CompoundTask {
         return false;
     }
 
+    // Ends both children, unless the race already finished (the losers were ended then).
     public void end() {
         if (taskOneDone || taskTwoDone) return;
         taskOne.end();
@@ -70,6 +74,7 @@ public class ParallelRaceTask extends CompoundTask {
         return new ParallelRaceTask(taskOne.reset(), taskTwo.reset());
     }
 
+    // A race ends if either child is guaranteed to.
     @Override
     public boolean ends() {
         return taskOne.ends() || taskTwo.ends();

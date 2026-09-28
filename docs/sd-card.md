@@ -1,6 +1,6 @@
 ---
 title: The SD card
-nav_order: 6
+nav_order: 7
 ---
 
 # The SD card
@@ -14,8 +14,8 @@ microSD card in the Control Hub.
 
 ## Formatting
 
-Format the card as **FAT32**. A card the Control Hub can't mount shows up as
-`SD Card not mounted, did you format it to FAT32?` on telemetry.
+Format the card as **FAT32**. A card the Control Hub can't mount stops the opMode at INIT with
+`SD Card not mounted, did you format it to FAT32?`.
 
 Tables for a full-resolution grid can run to several gigabytes per target, so use a large, reasonably
 fast card.
@@ -36,7 +36,8 @@ Everything sits at the **root** of the card:
 You never write these by hand. The desktop solver (`peregrine-desktop`) generates all of them.
 Copy them onto the card exactly as it outputs them.
 
-The robot also creates this folder on the card, for [calibration](calibration.md) logs:
+The robot also creates this folder on the card, for [calibration](calibration.md) and other
+`Logger` logs:
 
 ```
 /Android/data/com.qualcomm.ftcrobotcontroller/files/logs/
@@ -55,14 +56,15 @@ the model is valid, and that the values make physical sense.
 
 ## What the robot does with it
 
-- At INIT, the robot reads `MANIFEST.JSON` and `MODEL.JSON` and opens every table file.
+- At INIT, the robot reads `MANIFEST.JSON` and `MODEL.JSON` and opens every table file. opModes that
+  [opt out](opmodes.md#opting-out-of-the-sd-card-tables) skip all of this and never touch the tables.
 - It checks that the tables are in the field frame and use a supported storage type (`u8`, `u16`,
   `f16` or `f32`). `u16` is the default and the recommended choice.
 - While driving, it reads 7 values per loop from the files that are already open.
-- At STOP, it closes the files.
+- When the opMode ends, it closes the files.
 
-If anything is missing or invalid, a message appears on telemetry and the opMode stops. See
-[Troubleshooting](troubleshooting.md).
+If anything is missing or invalid, the opMode stops at INIT and the Driver Station shows an error
+message saying what's wrong. See [Troubleshooting](troubleshooting.md).
 
 ## Swapping cards
 

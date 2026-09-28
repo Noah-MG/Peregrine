@@ -1,10 +1,14 @@
 ---
 title: Getting started
-nav_order: 2
+nav_order: 3
 ---
 
 # Getting started
 {: .no_toc }
+
+This page is about adding Peregrine to an FTC project. If your team's project already has it and you
+just want to learn to use it, go to [Learn Peregrine](learn/index.md) instead.
+{: .fs-5 .fw-300 }
 
 1. TOC
 {:toc}
@@ -33,7 +37,9 @@ Inside it:
 | Package | What's in it | Should you edit it? |
 | --- | --- | --- |
 | `peregrine/editables` | `Hardware`, `RobotParams`, `GlobalVariables` | **Yes.** This is where your robot's details go. |
-| `peregrine/core` | The library itself: opMode base classes, tasks, pathing, calibration | Normally no. |
+| `peregrine/core` | The library itself: the opMode base class, tasks, pathing, calibration | Normally no. |
+
+If you also want the [QA testing](qa-testing.md) framework, copy the `teamcode/qa/` folder too.
 
 Your own opModes can live anywhere in `TeamCode`.
 
@@ -105,10 +111,13 @@ initialised.
 Insert the microSD card with your tables into the Control Hub. See [The SD card](sd-card.md) for what
 goes on it.
 
-{: .noteSupplier }
-Right now even teleop opModes load the tables at init, so you need a card with `MANIFEST.JSON` and
-`MODEL.JSON` on it before *any* Peregrine opMode will run.
+{: .note }
+By default every Peregrine opMode loads the tables at INIT, so it needs a card with `MANIFEST.JSON`
+and `MODEL.JSON` on it. opModes that never drive to targets can
+[opt out](opmodes.md#opting-out-of-the-sd-card-tables), and the built-in Calibration teleop already
+does.
 
 ## 6. Write your first opMode
 
-Continue to [Writing opModes](opmodes.md).
+Continue to [Writing opModes](opmodes.md), or follow the step-by-step
+[Learn Peregrine](learn/index.md) tutorial.

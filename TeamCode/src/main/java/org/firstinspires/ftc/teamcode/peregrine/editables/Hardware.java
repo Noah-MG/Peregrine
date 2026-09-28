@@ -35,15 +35,19 @@ public class Hardware {
         FR = opMode.hardwareMap.get(DcMotor.class, "FR");
         FR.setDirection(RobotParams.FRDirection);
         FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FL = opMode.hardwareMap.get(DcMotor.class, "FL");
         FL.setDirection(RobotParams.FLDirection);
         FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BR = opMode.hardwareMap.get(DcMotor.class, "BR");
         BR.setDirection(RobotParams.BRDirection);
         BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BL = opMode.hardwareMap.get(DcMotor.class, "BL");
         BL.setDirection(RobotParams.BLDirection);
         BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
 }

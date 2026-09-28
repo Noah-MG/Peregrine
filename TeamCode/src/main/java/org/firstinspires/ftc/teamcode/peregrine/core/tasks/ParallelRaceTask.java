@@ -43,7 +43,7 @@ public class ParallelRaceTask extends CompoundTask {
             taskTwo = tasks[1];
         } else if (tasks.length == 1) {
             // Paired with a task that never finishes, so a single-task race finishes when that task does.
-            taskOne = new WaitUntilTask(() -> false);
+            taskOne = new IdleTask();
             taskTwo = tasks[0];
         } else {
             taskOne = new EmptyTask();

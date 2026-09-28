@@ -74,6 +74,7 @@ return new SeriesTask(
 | `WaitUntilTask(() -> condition)` | Finishes on the first loop the condition is `true`. |
 | `InstantTask(() -> code)` | Runs the code once and finishes immediately. |
 | `EmptyTask()` | Does nothing and finishes immediately. |
+| `IdleTask()` | Does nothing and never finishes. Keeps a tree (and so the opMode) running until STOP. |
 
 `WaitUntilTask` and `InstantTask` take a **lambda**, a small piece of code written inline:
 
@@ -213,7 +214,8 @@ public class RunIntake extends Task {
 - **In a `SeriesTask`, the next task starts on the same loop the previous one finished.**
 - **In a `ParallelTask`, a child that has finished isn't run again** while the others carry on.
 - **A `ParallelRaceTask` ends the losers.** When one child finishes, `end()` is called on every child
-  that hasn't.
+  that hasn't. A race given a single task behaves exactly like that task: it finishes when the task
+  does, and it only counts as ending (`ends()`) if the task does.
 - **Don't put the same task object in a tree twice.** Each task keeps its own progress (such as a
   timer). If you need the same action twice, create two tasks, or use `task.reset()` to get a fresh
   copy.

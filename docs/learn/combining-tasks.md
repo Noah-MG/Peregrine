@@ -81,6 +81,7 @@ You don't need to write a class for every little thing.
 | `new WaitUntilTask(() -> condition)` | Finishes on the first loop the condition is `true`. |
 | `new InstantTask(() -> code)` | Runs one piece of code once, then finishes. |
 | `new EmptyTask()` | Does nothing and finishes straight away. Handy as a placeholder. |
+| `new IdleTask()` | Does nothing and never finishes. Put it in a `ParallelTask` to keep an opMode running after the rest is done. |
 
 `InstantTask` and `WaitUntilTask` take a **lambda** (see [Java ideas](java-concepts.md#lambdas-passing-code-as-a-value)).
 So `SetClaw` could have been written without a class at all:

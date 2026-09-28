@@ -55,8 +55,8 @@ public class ParallelTask extends CompoundTask {
     }
 
     public void end() {
-        taskOne.end();
-        taskTwo.end();
+        if (!taskOneDone) taskOne.end();
+        if (!taskTwoDone) taskTwo.end();
     }
 
     public Task reset() {

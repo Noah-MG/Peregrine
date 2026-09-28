@@ -52,10 +52,16 @@ public class ParallelRaceTask extends CompoundTask {
     public boolean run() {
         taskOneDone = taskOne.run();
         taskTwoDone = taskTwo.run();
-        return taskOneDone || taskTwoDone;
+        if(taskOneDone || taskTwoDone) {
+            if (!taskOneDone) taskOne.end();
+            if (!taskTwoDone) taskTwo.end();
+            return true;
+        }
+        return false;
     }
 
     public void end() {
+        if (taskOneDone || taskTwoDone) return;
         taskOne.end();
         taskTwo.end();
     }

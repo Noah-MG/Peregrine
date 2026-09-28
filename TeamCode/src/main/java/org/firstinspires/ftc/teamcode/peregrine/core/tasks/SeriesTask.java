@@ -58,11 +58,10 @@ public class SeriesTask extends CompoundTask {
 
     // Ends whichever child is currently active.
     public void end(){
-        if(!taskOneDone) {
-            taskOne.end();
+        if(taskOneDone) {
             taskTwo.end();
         } else {
-            taskTwo.end();
+            taskOne.end();
         }
     }
 

@@ -81,9 +81,11 @@ public abstract class PeregrineOpMode extends LinearOpMode {
         while(opModeIsActive() && !tree.run()) {
             mainLoop();
             telem.update();
+            if(!opModeIsActive()) {
+                tree.end();
+            }
         }
 
-        tree.end();
         optimalityEngine.closeReaders();
         end();
     }

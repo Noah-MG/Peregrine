@@ -40,7 +40,7 @@ public class ParallelRaceTask extends CompoundTask {
             taskTwo = tasks[1];
         } else if (tasks.length == 1) {
             // NOTE: EmptyTask finishes immediately, so a single-task race ends after one tick.
-            taskOne = new EmptyTask();
+            taskOne = new WaitUntilTask(() -> false);
             taskTwo = tasks[0];
         } else {
             taskOne = new EmptyTask();

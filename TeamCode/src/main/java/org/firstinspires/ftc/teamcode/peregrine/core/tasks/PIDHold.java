@@ -68,6 +68,8 @@ public class PIDHold extends Task {
     public PIDHold(PeregrineOpMode opMode, String target) {
         this.opMode = opMode;
         targetName = target;
+        if (opMode.optimalityEngine == null)
+            throw new IllegalStateException("This opMode's buildOptimalityEngine() returns false, but PIDHold needs the OptimalityEngine.");
         try {
             this.target = opMode.optimalityEngine.targets.get(targetName);
         } catch (NullPointerException e) {

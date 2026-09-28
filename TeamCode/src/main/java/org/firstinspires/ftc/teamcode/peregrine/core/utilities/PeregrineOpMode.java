@@ -61,8 +61,8 @@ public abstract class PeregrineOpMode extends LinearOpMode {
         hardware = new Hardware(this);
         // Blocks until the Pinpoint reports READY, then sets its pose to startingPose().
         localizer = new Localizer(this, startingPose());
-        optimalityEngine = new OptimalityEngine(this);
         globalVariables = new GlobalVariables();
+        if(buildOptimalityEngine()) optimalityEngine = new OptimalityEngine(this);
 
         tree = new ParallelRaceTask(localizer, defineTasks());
         initStart();
@@ -86,7 +86,7 @@ public abstract class PeregrineOpMode extends LinearOpMode {
             }
         }
 
-        optimalityEngine.closeReaders();
+        if(optimalityEngine != null) optimalityEngine.closeReaders();
         end();
     }
 
@@ -106,5 +106,7 @@ public abstract class PeregrineOpMode extends LinearOpMode {
 
     /**Is run once at the end of the opMode.*/
     public abstract void end();
+
+    protected boolean buildOptimalityEngine() { return true; }
 
 }

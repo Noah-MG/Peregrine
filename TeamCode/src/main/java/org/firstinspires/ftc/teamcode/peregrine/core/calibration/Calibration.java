@@ -68,4 +68,7 @@ public class Calibration extends PeregrineOpMode {
     public void end() {
 
     }
+
+    @Override
+    protected boolean buildOptimalityEngine() { return false; }
 }

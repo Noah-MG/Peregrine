@@ -79,7 +79,7 @@ target.
 the SD card. The target name and starting pose (`target`, `x0`, `y0`, `h0`) are editable from FTC
 Dashboard.
 
-{: .note }
+{: .noteSupplier }
 `PathingTest`'s default starting pose, (1, 1) cm, is outside the table area, so change it before you
 run.
 

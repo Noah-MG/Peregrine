@@ -13,7 +13,7 @@ Connect to the robot's Wi-Fi and open **http://192.168.43.1:8080/dash** in a bro
 telemetry from `opMode.telem`, plus a **Configuration** panel where the values below can be edited
 live.
 
-{: .note }
+{: .noteSupplier }
 Dashboard edits are lost when the app restarts. Once you've found a value you like, copy it into
 the code.
 

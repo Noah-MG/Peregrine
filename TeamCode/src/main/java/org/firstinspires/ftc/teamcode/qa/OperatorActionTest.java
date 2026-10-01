@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *         10000)
  * }</pre>
  */
-public class OperatorActionTest extends QATest{
+public class OperatorActionTest extends QATest {
 
     /** Builds the note written to the log once the test finishes. */
     public interface NoteSupplier {
@@ -59,20 +59,21 @@ public class OperatorActionTest extends QATest{
     }
 
     @Override
-    protected boolean step(QAContext ctx) {
+    public boolean step(QAContext ctx) {
         if(firstCall) {
             timer = new ElapsedTime();
             status = Status.RUNNING;
-            ctx.prompt(instruction + "\n Press X for SKIP, Y for ERROR");
             gamepad1 = ctx.gamepad1();
             firstCall = false;
         }
+        ctx.prompt(instruction + "\n Press X for SKIP, Y for ERROR");
         if(stepSupplier.run(ctx)) status = Status.PASS;
         if(timer.milliseconds() > timeoutMs) status = Status.FAIL;
         if(gamepad1.xWasPressed()) status = Status.SKIP;
         if(gamepad1.yWasPressed()) status = Status.ERROR;
         if(status != Status.RUNNING) {
             note = noteSupplier.get(ctx);
+            gamepad1.rumble(200);
             return true;
         }
         return false;

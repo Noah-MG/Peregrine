@@ -27,13 +27,13 @@ public final class RobotParams {
     public static double odoYOffset = -18.858;
     public static GoBildaPinpointDriver.GoBildaOdometryPods podType = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
     public static GoBildaPinpointDriver.EncoderDirection xEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
-    public static GoBildaPinpointDriver.EncoderDirection yEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+    public static GoBildaPinpointDriver.EncoderDirection yEncoderDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
 
     // Set so that a positive power drives each wheel forward.
-    public static DcMotor.Direction FRDirection = DcMotor.Direction.REVERSE;
-    public static DcMotor.Direction FLDirection = DcMotor.Direction.FORWARD;
-    public static DcMotor.Direction BRDirection = DcMotor.Direction.REVERSE;
-    public static DcMotor.Direction BLDirection = DcMotor.Direction.FORWARD;
+    public static DcMotor.Direction FRDirection = DcMotor.Direction.FORWARD;
+    public static DcMotor.Direction FLDirection = DcMotor.Direction.REVERSE;
+    public static DcMotor.Direction BRDirection = DcMotor.Direction.FORWARD;
+    public static DcMotor.Direction BLDirection = DcMotor.Direction.REVERSE;
 
 }

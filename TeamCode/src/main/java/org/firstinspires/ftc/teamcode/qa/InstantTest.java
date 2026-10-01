@@ -42,7 +42,7 @@ public class InstantTest extends QATest {
     }
 
     @Override
-    protected boolean step(QAContext ctx) {
+     public boolean step(QAContext ctx) {
         status = Status.RUNNING;
         status = stepSupplier.run(ctx);
         note = noteSupplier.get(ctx);

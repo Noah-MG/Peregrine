@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
  *     it happen.</li>
  * </ul>
  */
-public abstract class QATest {
+public abstract class QATest implements QATask {
     /** What a test checks: code alone, a physical part of the robot, or both working together. */
     public enum Category { SOFTWARE, HARDWARE, INTEGRATED }
 
@@ -46,24 +46,6 @@ public abstract class QATest {
         this.name = name;
         this.category = category;
     }
-
-    /**
-     * Does one loop's worth of the test. Called once per loop until it returns true, and must return
-     * quickly. Set {@code status} (and optionally {@code note}) before returning true.
-     *
-     * <p>Throwing is also a way to finish: a QAContext.UnavailableSubsystem marks the test SKIP, an
-     * AssertionError marks it FAIL, and anything else marks it ERROR.</p>
-     *
-     * @param ctx access to the robot and the tester for this test
-     * @return true once the test has finished
-     */
-    protected abstract boolean step(QAContext ctx);
-
-    /**
-     * Called once after the test finishes, however it finished, before QRRoutine.cleanupHardware().
-     * Does nothing by default.
-     */
-    protected void cleanup(QAContext ctx) {}
 
     /** @return how long the test may run before it fails as "TIMED OUT", in milliseconds */
     protected long timeoutMs() { return defaultTimeout; }

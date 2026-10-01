@@ -67,7 +67,7 @@ public class SimpleTest extends QATest {
     }
 
     @Override
-    protected boolean step(QAContext ctx) {
+    public boolean step(QAContext ctx) {
         if(firstCall) {
             status = Status.RUNNING;
             firstCall = false;
@@ -83,7 +83,7 @@ public class SimpleTest extends QATest {
     }
 
     @Override
-    protected void cleanup(QAContext ctx) {
+    public void cleanup(QAContext ctx) {
         if (cleanupSupplier != null) cleanupSupplier.run(ctx);
     }
 

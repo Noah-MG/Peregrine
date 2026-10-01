@@ -86,12 +86,10 @@ public class QAContext {
     }
 
     QAEnvironment environment;
-    QRRoutine opMode;
-    QATest test;
-
-    // Telemetry lines showing the current test and the instruction for the tester.
-    Telemetry.Item header;
-    Telemetry.Item instruction;
+    public QRRoutine opMode;
+    QATask task;
+    public QATest test;
+    public boolean isTest;
 
     // Time since this test started.
     ElapsedTime timer;
@@ -102,18 +100,22 @@ public class QAContext {
      *
      * @throws IllegalArgumentException if the routine's telemetry hasn't been set up yet.
      */
-    public QAContext(QRRoutine opMode, QATest test) {
+    public QAContext(QRRoutine opMode, QATask task) {
         this.opMode = opMode;
-        this.test = test;
-        environment = new QAEnvironment();
-        environment.hardwareMap = opMode.hardwareMap;
-        if (opMode.telem == null) throw new IllegalArgumentException("Define telem in QRRoutine before opening QAContext");
-        environment.telem = opMode.telem;
-        environment.gamepad1 = opMode.gamepad1;
-        environment.gamepad2 = opMode.gamepad2;
-        header = opMode.telem.addData("TEST", () ->
-                test.category + " [" + test.status + "]: " + test.name);
-        instruction = opMode.telem.addData("Instruction", "none");
+        this.task = task;
+        if(task instanceof QATest) {
+            isTest = true;
+            test = (QATest) task;
+            environment = new QAEnvironment();
+            environment.hardwareMap = opMode.hardwareMap;
+            if (opMode.telem == null)
+                throw new IllegalArgumentException("Define telem in QRRoutine before opening QAContext");
+            environment.telem = opMode.telem;
+            environment.gamepad1 = opMode.gamepad1;
+            environment.gamepad2 = opMode.gamepad2;
+        } else {
+            isTest = false;
+        }
         timer = new ElapsedTime();
 
         // Clear any button presses left over from the previous test.
@@ -128,11 +130,13 @@ public class QAContext {
      * {@code new WaitTask(ctx.opMode(), 500)}. Call hardware() or localizer() first if the task needs them.
      */
     public PeregrineOpMode opMode() {
+        if(!isTest) throw new IllegalStateException("This is not a test, there is no environment");
         return environment;
     }
 
     /** The FTC hardwareMap, for devices that aren't in Hardware. */
     public HardwareMap hardwareMap() {
+        if(!isTest) throw new IllegalStateException("This is not a test, there is no environment");
         return environment.hardwareMap;
     }
 
@@ -141,6 +145,7 @@ public class QAContext {
      * @throws UnavailableSubsystem if it can't be built, for example when a device is missing from the configuration.
      */
     public Hardware hardware() throws UnavailableSubsystem {
+        if(!isTest) throw new IllegalStateException("This is not a test, there is no environment");
         if (environment.hardware == null) {
             try {
                 environment.hardware = new Hardware(environment);
@@ -158,6 +163,7 @@ public class QAContext {
      * @throws UnavailableSubsystem if it or the hardware can't be built.
      */
     public Localizer localizer() throws UnavailableSubsystem {
+        if(!isTest) throw new IllegalStateException("This is not a test, there is no environment");
         if (environment.localizer == null) {
             if(environment.hardware == null) hardware();
             try {
@@ -176,6 +182,7 @@ public class QAContext {
      * @throws UnavailableSubsystem if the card or tables are missing or invalid.
      */
     public OptimalityEngine optimalityEngine() throws UnavailableSubsystem {
+        if(!isTest) throw new IllegalStateException("This is not a test, there is no environment");
         if (environment.optimalityEngine == null) {
             try {
                 environment.optimalityEngine = new OptimalityEngine(environment);
@@ -189,11 +196,13 @@ public class QAContext {
 
     /** Telemetry to the Driver Station and FTC Dashboard. */
     public Telemetry telem() {
+        if(!isTest) return opMode.telem;
         return environment.telem;
     }
 
     /** A GlobalVariables object, built on first use. */
     public GlobalVariables globalVariables() {
+        if(!isTest) throw new IllegalStateException("This is not a test, there is no environment");
         if (environment.globalVariables == null) {
             try {
                 environment.globalVariables = new GlobalVariables();
@@ -209,7 +218,7 @@ public class QAContext {
 
     /** Shows an instruction to the tester on the "Instruction" telemetry line. */
     public void prompt(String instruction) {
-        this.instruction.setValue(instruction);
+        opMode.telem.addData("Instruction", instruction);
     }
 
     public Gamepad gamepad1() {
@@ -236,17 +245,19 @@ public class QAContext {
 
     // One loop of the test: update the localizer if the test built one, then step the test.
     protected boolean tick() {
-        if (environment.localizer != null) environment.localizer.run();
-        return test.step(this);
+        if(isTest) opMode.telem.addData("TEST", test.category + " [" + test.status + "]: " + test.name);
+        else opMode.telem.addData("ITEM", "RUNNING");
+        if(isTest) if(environment.localizer != null) environment.localizer.run();
+        return task.step(this);
     }
 
     // After the test: its own cleanup, then the routine's hardware cleanup, then close any table files.
     // Errors here are ignored so that the next test still runs.
     protected void close() {
-        try { test.cleanup(this); } catch (Throwable ignored) {}
+        try { task.cleanup(this); } catch (Throwable ignored) {}
         try { opMode.cleanupHardware(this, environment.hardware != null); }
         catch (Throwable ignored) {}
-        if(environment.optimalityEngine != null) try { environment.optimalityEngine.closeReaders(); }
+        try { if(environment.optimalityEngine != null) environment.optimalityEngine.closeReaders(); }
         catch (Throwable ignored) {}
     }
 }

@@ -51,13 +51,13 @@ public class ManualCheckTest extends QATest{
     }
 
     @Override
-    protected boolean step(QAContext ctx) {
+    public boolean step(QAContext ctx) {
         if(firstCall) {
             status = Status.RUNNING;
-            ctx.prompt(instruction + "\n Press A for PASS, B for FAIL, X for SKIP, Y for ERROR");
             gamepad1 = ctx.gamepad1();
             firstCall = false;
         }
+        ctx.prompt(instruction + "\n Press A for PASS, B for FAIL, X for SKIP, Y for ERROR");
         stepSupplier.run(ctx);
 
         if(gamepad1.aWasPressed()) status = Status.PASS;
@@ -66,6 +66,7 @@ public class ManualCheckTest extends QATest{
         if(gamepad1.yWasPressed()) status = Status.ERROR;
         if(status != Status.RUNNING) {
             note = noteSupplier.get(ctx);
+            gamepad1.rumble(200);
             return true;
         }
         return false;

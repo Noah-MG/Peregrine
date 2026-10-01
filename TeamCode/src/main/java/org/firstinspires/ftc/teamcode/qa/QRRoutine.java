@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * <h3>An opMode that runs a list of QA tests and logs the results.</h3>
  *
- * <p>Extend it, add {@code @TeleOp}, and implement {@link #tests()} and
+ * <p>Extend it, add {@code @TeleOp}, and implement {@link #tasks()} and
  * {@link #cleanupHardware(QAContext, boolean)}. Before pressing INIT, set QAConfig.tester and
  * QAConfig.logName in FTC Dashboard; the routine refuses to start with the default log name.</p>
  *
@@ -26,7 +26,7 @@ public abstract class QRRoutine extends LinearOpMode {
 
     // Driver Station + FTC Dashboard telemetry, shared with every QAContext.
     Telemetry telem;
-    List<QATest> tests;
+    List<QATask> tasks;
     QALogger logger;
 
     // Summary counts shown at the end.
@@ -38,49 +38,60 @@ public abstract class QRRoutine extends LinearOpMode {
     public void runOpMode() {
         if(Objects.equals(QAConfig.logName, "Unnamed Log")) throw new IllegalArgumentException("Rename the log to something else!");
         telem = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        telem.setAutoClear(false);
-        tests = tests();
+        tasks = tasks();
         logger = new QALogger();
         passCount = 0;
         notPassed = new ArrayList<>();
-        totalCount = tests.size();
 
         waitForStart();
 
         // Run each test until it finishes, times out or throws; then clean up and log it.
-        for(QATest test : tests) {
+        for(QATask task : tasks) {
             if (!opModeIsActive()) break;
-            String err = "";
-            QAContext ctx = new QAContext(this, test);
-            try {
-                while (!ctx.tick() && opModeIsActive()) {
-                    if (ctx.after(test.timeoutMs() / 1000.0)) {
-                        test.status = QATest.Status.FAIL;
-                        err = "TIMED OUT";
-                        break;
+            QAContext ctx = new QAContext(this, task);
+            if(ctx.isTest) {
+                totalCount++;
+                String err = "";
+                try {
+                    while (!ctx.tick() && opModeIsActive()) {
+                        if (ctx.after(ctx.test.timeoutMs() / 1000.0)) {
+                            ctx.test.status = QATest.Status.FAIL;
+                            err = "TIMED OUT";
+                            break;
+                        }
+                        telem.update();
                     }
+                } catch (QAContext.UnavailableSubsystem e) {
+                    ctx.test.status = QATest.Status.SKIP;
+                    err = e.toString();
+                } catch (AssertionError e) {
+                    ctx.test.status = QATest.Status.FAIL;
+                    err = e.toString();
+                } catch (Throwable e) {
+                    ctx.test.status = QATest.Status.ERROR;
+                    err = e.toString();
+                } finally {
+                    try {
+                        ctx.close();
+                    } catch (Throwable ignored) {
+                    }
+                }
+                // Still running here means the opMode was stopped mid-test.
+                if (ctx.test.status == QATest.Status.RUNNING) {
+                    ctx.test.status = QATest.Status.SKIP;
+                    err = "STOPPED";
+                }
+                if (ctx.test.status == QATest.Status.PASS) passCount++;
+                else notPassed.add(ctx.test);
+                telem.clearAll();
+                if (!Objects.equals(err, "")) logger.writeToLog(ctx.test, err);
+                else logger.writeToLog(ctx.test);
+            } else {
+                while (!ctx.tick() && opModeIsActive()) {
                     telem.update();
                 }
-            } catch (QAContext.UnavailableSubsystem e) {
-                test.status = QATest.Status.SKIP;
-                err = e.toString();
-            } catch (AssertionError e) {
-                test.status = QATest.Status.FAIL;
-                err = e.toString();
-            } catch (Throwable e) {
-                test.status = QATest.Status.ERROR;
-                err = e.toString();
-            } finally {
-                try { ctx.close(); } catch (Throwable ignored) {}
+                ctx.close();
             }
-            // Still running here means the opMode was stopped mid-test.
-            if (test.status == QATest.Status.RUNNING) {
-                test.status = QATest.Status.SKIP;
-                err = "STOPPED";
-            }
-            if(test.status == QATest.Status.PASS) passCount++; else notPassed.add(test);
-            telem.clearAll();
-            if (!Objects.equals(err, "")) logger.writeToLog(test, err); else logger.writeToLog(test);
         }
 
         // Summary: how many passed, and the name, status and note of every test that didn't.
@@ -106,7 +117,7 @@ public abstract class QRRoutine extends LinearOpMode {
      * Builds the tests to run, in order. Called once during INIT.
      * @return the tests, run first to last
      */
-    public abstract List<QATest> tests();
+    public abstract List<QATask> tasks();
 
     /**
      * Puts the robot in a safe state after each test, for example by turning every motor off. Called

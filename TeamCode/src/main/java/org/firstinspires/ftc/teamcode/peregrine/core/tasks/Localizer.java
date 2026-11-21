@@ -28,7 +28,7 @@ public class Localizer extends Task {
     /**
      * Stores startingPose. The Pinpoint's position is not set here but on the first run(), at the
      * start of the match, which gives the Pinpoint all of INIT to finish setting up after Hardware
-     * reset it.
+     * reset it. If startingPose is null then the pose already stored on the pinpoint will be used.
      *
      * @param opMode the running opMode; its hardware and telem must already be built
      * @param startingPose where the robot is, in the field frame
@@ -40,6 +40,12 @@ public class Localizer extends Task {
         if (startingPose != null) opMode.hardware.odo.resetPosAndIMU();
     }
 
+    /**
+     * Sets up the Localizer. Supplies no starting pose so that the pose already stored on the
+     * pinpoint gets used.
+     *
+     * @param opMode the running opMode; its hardware and telem must already be built
+     */
     public Localizer (PeregrineOpMode opMode) {
         this(opMode, null);
     }
@@ -95,7 +101,7 @@ public class Localizer extends Task {
     @Override
     public void end() {}
 
-    // NOTE: constructing a new Localizer puts the Pinpoint's pose back at startingPose.
+    // NOTE: constructing a new Localizer puts the Pinpoint's pose back at startingPose unless startingPose is null.
     @Override
     public Task reset() {
         return new Localizer(opMode, startingPose);

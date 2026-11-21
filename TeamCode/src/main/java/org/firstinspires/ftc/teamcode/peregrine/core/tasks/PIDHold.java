@@ -36,7 +36,7 @@ public class PIDHold extends Task {
     int target;
     // Target state as a 6x1 column [x, y, h, vx, vy, w], field frame.
     SimpleMatrix targetState;
-    // Target given directly as a pose, or null when the target came from the SD card by name.
+    // Target given directly as a pose, or (0, 0, 0) when the target came from the SD card by name.
     Pose2D targetPose;
 
     // Gains and model terms from MODEL.JSON "honing" (§8.8.1). bEffInv and lambda are loaded but only

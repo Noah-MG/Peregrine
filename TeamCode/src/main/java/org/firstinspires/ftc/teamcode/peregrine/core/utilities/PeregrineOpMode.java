@@ -69,7 +69,6 @@ public abstract class PeregrineOpMode extends LinearOpMode {
         // because tasks such as Drive use the other objects in their constructors.
         telem = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         hardware = new Hardware(this);
-        // Blocks until the Pinpoint reports READY, then sets its pose to startingPose().
         localizer = new Localizer(this, startingPose());
         globalVariables = new GlobalVariables();
         if(buildOptimalityEngine()) optimalityEngine = new OptimalityEngine(this);

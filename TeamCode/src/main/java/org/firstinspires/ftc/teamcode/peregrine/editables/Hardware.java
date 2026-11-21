@@ -34,7 +34,6 @@ public class Hardware {
         odo.setOffsets(RobotParams.odoXOffset, RobotParams.odoYOffset, RobotParams.distanceUnit);
         odo.setEncoderResolution(RobotParams.podType);
         odo.setEncoderDirections(RobotParams.xEncoderDirection, RobotParams.yEncoderDirection);
-        odo.resetPosAndIMU();
 
         // Open-loop power control: the drivetrain model was fitted against raw power, not encoder velocity.
         FR = opMode.hardwareMap.get(DcMotor.class, "FR");

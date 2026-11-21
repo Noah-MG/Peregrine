@@ -58,7 +58,8 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     /**
      * This function should return the pose of the robot when init is pressed, in the field frame the
      * tables were solved in. Everything the Localizer reports afterwards is relative to it.
-     * @return The pose of the robot when init is pressed
+     * @return The pose of the robot when init is pressed; null keeps the pose currently stored on
+     * the pinpoint.
      */
     public abstract Pose2D startingPose();
 

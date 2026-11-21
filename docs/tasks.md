@@ -99,6 +99,7 @@ new ParallelRaceTask(new Drive(this, "park"), new WaitTask(this, 3000))  // give
 | --- | --- |
 | `Drive(opMode, "target")` | Drives to a named target from the SD card tables, then finishes. See [Driving to targets](driving-to-targets.md). |
 | `PIDHold(opMode, "target")` | Holds the robot on a target with the honing PID. Never finishes on its own. `Drive` uses it internally. |
+| `PIDHold(opMode, pose)` | Same as above, but holds a `Pose2D` (field frame) given directly instead of a named target. The opMode still needs `buildOptimalityEngine()` to return `true`, because the PID gains come from the model. |
 | `TeleopMovement(opMode)` | Robot-centric mecanum driving from gamepad 1: left stick to drive and strafe, right stick to turn. Never finishes. |
 
 ### Teleop

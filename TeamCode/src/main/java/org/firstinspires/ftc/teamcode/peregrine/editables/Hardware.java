@@ -25,7 +25,7 @@ public class Hardware {
 
     /**
      * Maps and configures every device using the opMode's hardwareMap and the values in RobotParams.
-     * PeregrineOpMode calls this once at INIT. It also resets the Pinpoint's position and IMU.
+     * PeregrineOpMode calls this once at INIT.
      */
     public Hardware(PeregrineOpMode opMode) {
         odo = opMode.hardwareMap.get(GoBildaPinpointDriver.class, "odo");
@@ -34,7 +34,6 @@ public class Hardware {
         odo.setOffsets(RobotParams.odoXOffset, RobotParams.odoYOffset, RobotParams.distanceUnit);
         odo.setEncoderResolution(RobotParams.podType);
         odo.setEncoderDirections(RobotParams.xEncoderDirection, RobotParams.yEncoderDirection);
-        odo.resetPosAndIMU();
 
         // Open-loop power control: the drivetrain model was fitted against raw power, not encoder velocity.
         FR = opMode.hardwareMap.get(DcMotor.class, "FR");

@@ -58,7 +58,8 @@ public abstract class PeregrineOpMode extends LinearOpMode {
     /**
      * This function should return the pose of the robot when init is pressed, in the field frame the
      * tables were solved in. Everything the Localizer reports afterwards is relative to it.
-     * @return The pose of the robot when init is pressed
+     * @return The pose of the robot when init is pressed; null keeps the pose currently stored on
+     * the pinpoint.
      */
     public abstract Pose2D startingPose();
 
@@ -69,7 +70,6 @@ public abstract class PeregrineOpMode extends LinearOpMode {
         // because tasks such as Drive use the other objects in their constructors.
         telem = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         hardware = new Hardware(this);
-        // Blocks until the Pinpoint reports READY, then sets its pose to startingPose().
         localizer = new Localizer(this, startingPose());
         globalVariables = new GlobalVariables();
         if(buildOptimalityEngine()) optimalityEngine = new OptimalityEngine(this);
